@@ -20,8 +20,8 @@ android {
         applicationId "com.softx.app"
         minSdk 24
         targetSdk 36
-        versionCode 2026102105
-        versionName "1.2.6"
+        versionCode 2026102106
+        versionName "1.2.7"
         multiDexEnabled true
         buildConfigField "String", "POCKET_BASE_URL", "\"https://pocketpro.corexbd.com/\""
         buildConfigField "String", "POCKET_ADMOB_BANNER_ID", "\"${pocketAdMobBannerId}\""

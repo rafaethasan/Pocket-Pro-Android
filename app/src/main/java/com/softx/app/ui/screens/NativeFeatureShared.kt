@@ -17,13 +17,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,21 +78,54 @@ fun NativeFeatureTopBar(
                     tint = TextPrimary,
                 )
             }
-            Column(
+            Row(
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 8.dp, start = 8.dp, end = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(title, color = TextPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp)
                 if (subtitle.isNotBlank()) {
-                    Text(subtitle, color = TextSecondary, lineHeight = 20.sp)
+                    NativeInlineInfoButton(title = title, message = subtitle)
                 }
             }
             Spacer(modifier = Modifier.width(48.dp))
         }
         androidx.compose.material3.HorizontalDivider(color = TextSecondary.copy(alpha = 0.12f))
+    }
+}
+
+/** Keeps contextual help available without adding a second explanatory line to the UI. */
+@Composable
+fun NativeInlineInfoButton(
+    title: String,
+    message: String,
+    modifier: Modifier = Modifier,
+) {
+    var showInfo by remember(title, message) { mutableStateOf(false) }
+
+    IconButton(
+        onClick = { showInfo = true },
+        modifier = modifier.size(30.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Info,
+            contentDescription = "About $title",
+            tint = TextSecondary,
+            modifier = Modifier.size(17.dp),
+        )
+    }
+
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text(title, color = TextPrimary, fontWeight = FontWeight.Bold) },
+            text = { Text(message, color = TextSecondary, lineHeight = 21.sp) },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) { Text("Got it") }
+            },
+        )
     }
 }
 

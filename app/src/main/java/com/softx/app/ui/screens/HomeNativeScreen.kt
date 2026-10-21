@@ -660,6 +660,11 @@ private fun DueThisMonthStrip(
     nextDueLabel: String,
     onClick: () -> Unit,
 ) {
+    val dueInfo = if (nextDueLabel.isBlank()) {
+        "Review upcoming installments, loans and bills in Plans."
+    } else {
+        "Next due: $nextDueLabel. Review upcoming installments, loans and bills in Plans."
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -674,13 +679,9 @@ private fun DueThisMonthStrip(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Due this month", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(
-                    if (nextDueLabel.isBlank()) "Open plans to review all upcoming dues" else "Next due $nextDueLabel",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                )
+                NativeInlineInfoButton(title = "Due this month", message = dueInfo)
             }
             Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(18.dp))
         }
@@ -1054,13 +1055,13 @@ private data class HomeQuickActionItem(
 
 @Composable
 private fun SectionHeader(title: String, subtitle: String, modifier: Modifier = Modifier) {
-    Column(
+    Row(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(3.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         if (subtitle.isNotBlank()) {
-            Text(subtitle, color = TextSecondary, fontSize = 12.sp)
+            NativeInlineInfoButton(title = title, message = subtitle)
         }
     }
 }
