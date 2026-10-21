@@ -117,6 +117,7 @@ import com.softx.app.ui.screens.SettingsNativeScreen
 import com.softx.app.ui.screens.SmartInsightsNativeScreen
 import com.softx.app.ui.screens.LocalPocketPremiumPlansLauncher
 import com.softx.app.ui.theme.SurfaceBase
+import com.softx.app.ui.theme.SurfaceCard
 import com.softx.app.ui.theme.TextPrimary
 import com.softx.app.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
@@ -187,20 +188,20 @@ private fun normalizeRecordEditKind(record: PocketNativeRecordItem): String {
     }
 }
 
-private val BottomBarPureBlack = Color(0xFF09090D)
-private val BottomBarSurface = Color(0x4D111524)
-private val BottomBarSurfaceSoft = Color(0x33191E31)
-private val BottomBarStroke = Color(0xFF2D3554)
-private val BottomBarIconGrey = Color(0xFFA8B2CF)
-private val BottomBarAccentOrange = Color(0xFFE5791B)
-private val BottomBarAccentOrangeDark = Color(0xFFCC6310)
-private val BottomBarAccentPurple = Color(0xFF8B5CF6)
-private val BottomBarAccentPink = Color(0xFFEC4899)
-private val BottomBarAccentBlue = Color(0xFF60A5FA)
-private val BottomBarSelectedGlow = Color(0x228B5CF6)
-private val NotificationOverlayScrim = Color(0xCC070B13)
-private val NotificationOverlaySurface = Color(0xFF161D2B)
-private val NotificationOverlaySoft = Color(0xFF212A3D)
+private val BottomBarPureBlack = Color.White
+private val BottomBarSurface = Color(0xFFFFFFFF)
+private val BottomBarSurfaceSoft = Color(0xFFF0F4FF)
+private val BottomBarStroke = Color(0xFFDCE5F5)
+private val BottomBarIconGrey = Color(0xFF8A98B2)
+private val BottomBarAccentOrange = Color(0xFFF09A3E)
+private val BottomBarAccentOrangeDark = Color(0xFFD97A1A)
+private val BottomBarAccentPurple = Color(0xFF596CFF)
+private val BottomBarAccentPink = Color(0xFFF05B78)
+private val BottomBarAccentBlue = Color(0xFF2E6BFF)
+private val BottomBarSelectedGlow = Color(0x1A2E6BFF)
+private val NotificationOverlayScrim = Color(0x660F172A)
+private val NotificationOverlaySurface = Color(0xFFFFFFFF)
+private val NotificationOverlaySoft = Color(0xFFF0F4FF)
 
 @Composable
 fun PocketProNativeApp() {
@@ -696,7 +697,7 @@ private fun NativeShell(
                     .fillMaxSize()
                     .background(
                         brush = Brush.verticalGradient(
-                            colors = listOf(Color(0xFF10131C), SurfaceBase, Color(0xFF0A0D13)),
+                            colors = listOf(Color(0xFFF9FBFF), SurfaceBase, Color(0xFFEDF3FF)),
                         ),
                     )
                     .padding(
@@ -1298,7 +1299,7 @@ private fun FloatingTabBackBar(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF182032).copy(alpha = 0.96f))
+                .background(SurfaceCard.copy(alpha = 0.96f))
                 .clickable(onClick = onBack)
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1852,9 +1853,9 @@ private fun PocketFloatingBottomBar(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .height(70.dp)
-                    .shadow(2.dp, RoundedCornerShape(999.dp))
+                    .shadow(14.dp, RoundedCornerShape(999.dp), clip = false)
                     .background(
-                        color = Color(0xFF1E6DFF),
+                        color = Color.White,
                         shape = RoundedCornerShape(999.dp),
                     ),
             )
@@ -1880,7 +1881,7 @@ private fun PocketFloatingBottomBar(
                                     .offset(y = (-12).dp)
                                     .size(78.dp)
                                     .background(
-                                        color = BottomBarPureBlack,
+                                        color = Color.White,
                                         shape = CircleShape,
                                     ),
                                 contentAlignment = Alignment.Center,
@@ -1890,12 +1891,12 @@ private fun PocketFloatingBottomBar(
                                         .size(68.dp)
                                         .shadow(20.dp, CircleShape)
                                         .border(
-                                            width = 2.dp,
-                                            color = BottomBarAccentOrange.copy(alpha = 0.9f),
+                                            width = 4.dp,
+                                            color = Color.White,
                                             shape = CircleShape,
                                         )
                                         .background(
-                                            color = BottomBarPureBlack,
+                                            color = BottomBarAccentBlue,
                                             shape = CircleShape,
                                         )
                                         .clickable { onSelect(destination) },
@@ -1904,7 +1905,7 @@ private fun PocketFloatingBottomBar(
                                     Icon(
                                         imageVector = destination.icon,
                                         contentDescription = destination.label,
-                                        tint = BottomBarAccentOrange,
+                                        tint = Color.White,
                                         modifier = Modifier.size(26.dp),
                                     )
                                 }
@@ -1924,7 +1925,7 @@ private fun PocketFloatingBottomBar(
                                 modifier = Modifier
                                     .size(if (selected) 40.dp else 28.dp)
                                     .background(
-                                        color = if (selected) Color(0xFF2A304D) else Color.Transparent,
+                                        color = if (selected) BottomBarSelectedGlow else Color.Transparent,
                                         shape = CircleShape,
                                     ),
                                 contentAlignment = Alignment.Center,
@@ -1932,14 +1933,14 @@ private fun PocketFloatingBottomBar(
                                 Icon(
                                     imageVector = destination.icon,
                                     contentDescription = destination.label,
-                                    tint = if (selected) Color.White else BottomBarIconGrey.copy(alpha = 0.98f),
+                                    tint = if (selected) BottomBarAccentBlue else BottomBarIconGrey.copy(alpha = 0.98f),
                                     modifier = Modifier.size(if (selected) 18.dp else 17.dp),
                                 )
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = destination.label,
-                                color = if (selected) Color.White.copy(alpha = 0.95f) else BottomBarIconGrey.copy(alpha = 0.96f),
+                                color = if (selected) BottomBarAccentBlue else BottomBarIconGrey.copy(alpha = 0.96f),
                                 fontSize = 10.sp,
                                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                             )

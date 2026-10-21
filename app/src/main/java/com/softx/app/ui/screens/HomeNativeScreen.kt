@@ -90,9 +90,9 @@ import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 
-private val HomeElectricBlue = Color(0xFF58A6FF)
-private val HomeFooterBlue = Color(0xFF1E6DFF)
-private val HomeFooterBlueDeep = Color(0xFF1554D1)
+private val HomeElectricBlue = Color(0xFF36B7F5)
+private val HomeFooterBlue = Color(0xFF3774FF)
+private val HomeFooterBlueDeep = Color(0xFF2454D6)
 
 @Composable
 fun HomeNativeScreen(
@@ -269,7 +269,7 @@ fun HomeNativeScreen(
                             Text("Available balance", color = Color.White.copy(alpha = 0.68f), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                             Text(
                                 text = formatCurrency(summary.totalBalance, currencySymbol),
-                                color = TextPrimary,
+                                color = Color.White,
                                 fontSize = 34.sp,
                                 fontWeight = FontWeight.Black,
                             )
@@ -313,20 +313,10 @@ fun HomeNativeScreen(
         item {
             QuickActionRow(
                 items = listOf(
-                    HomeQuickActionItem("Add entry", "Income, expense or loan", AccentPink, pocketFeatureAssetName("add"), pocketFeatureIcon("add"), onOpenAdd),
-                    HomeQuickActionItem("Records", "See all money history", HomeElectricBlue, pocketFeatureAssetName("records"), pocketFeatureIcon("records"), onOpenRecords),
-                    HomeQuickActionItem("Plans", "Budget and reminders", AccentOrange, pocketFeatureAssetName("plans"), pocketFeatureIcon("plans"), onOpenBudget),
-                    HomeQuickActionItem("Goals", "Savings target", AccentPurple, pocketFeatureAssetName("goals"), pocketFeatureIcon("goals"), onOpenGoals),
-                ),
-            )
-        }
-        item {
-            QuickActionRow(
-                items = listOf(
-                    HomeQuickActionItem("Accounts", "Cash, bank and wallet", HomeElectricBlue, pocketFeatureAssetName("accounts"), pocketFeatureIcon("accounts"), onOpenAccounts),
-                    HomeQuickActionItem("Search", "Find any record", AccentPurple, pocketFeatureAssetName("search"), pocketFeatureIcon("search"), onOpenSearch),
-                    HomeQuickActionItem("Reports", "Charts and export", AccentOrange, pocketFeatureAssetName("reports"), pocketFeatureIcon("reports"), onOpenReports),
-                    HomeQuickActionItem("More", "Settings and tools", AccentPurple, pocketFeatureAssetName("more"), pocketFeatureIcon("more"), onOpenMore),
+                    HomeQuickActionItem("Accounts", "Cash and banks", HomeElectricBlue, pocketFeatureAssetName("accounts"), pocketFeatureIcon("accounts"), onOpenAccounts),
+                    HomeQuickActionItem("Plans", "Bills and reminders", AccentOrange, pocketFeatureAssetName("plans"), pocketFeatureIcon("plans"), onOpenBudget),
+                    HomeQuickActionItem("Goals", "Savings target", AccentGreen, pocketFeatureAssetName("goals"), pocketFeatureIcon("goals"), onOpenGoals),
+                    HomeQuickActionItem("Reports", "Spending insights", AccentPurple, pocketFeatureAssetName("reports"), pocketFeatureIcon("reports"), onOpenReports),
                 ),
             )
         }
@@ -1103,7 +1093,7 @@ private fun HeroMiniMetric(title: String, value: String, modifier: Modifier = Mo
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(title, color = Color.White.copy(alpha = 0.56f), fontWeight = FontWeight.Medium, fontSize = 10.sp)
-        Text(value, color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Text(value, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
