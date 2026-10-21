@@ -35,6 +35,7 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Search
@@ -229,14 +230,7 @@ fun HomeNativeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     PocketUserAvatar(user = user, size = 52.dp)
-                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text("Pocket Pro", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                        Text(
-                            "Private money manager",
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                        )
-                    }
+                    Text("Pocket Pro", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     HeaderActionButton(
@@ -296,11 +290,6 @@ fun HomeNativeScreen(
                                 fontWeight = FontWeight.Black,
                                 modifier = Modifier.clickable { isBalanceVisible = !isBalanceVisible },
                             )
-                            Text(
-                                if (isBalanceVisible) "All accounts combined" else "Tap balance to show",
-                                color = Color.White.copy(alpha = 0.48f),
-                                fontSize = 10.sp,
-                            )
                         }
                     }
                     Box(
@@ -317,157 +306,18 @@ fun HomeNativeScreen(
                 }
             }
         }
-        item {
-            DueThisMonthStrip(
-                installmentCount = thisMonthInstallments.size,
-                installmentTotal = formatCurrency(thisMonthInstallmentTotal, currencySymbol),
-                loanCount = thisMonthLoanReminders.size,
-                loanTotal = formatCurrency(thisMonthLoanTotal, currencySymbol),
-                monthlyCount = thisMonthMonthlyReminders.size,
-                nextDueLabel = nextDueLabel,
-                onClick = onOpenBudget,
-            )
-        }
-        item {
-            TodayStrip(
-                income = formatCurrency(summary.todayIncome, currencySymbol),
-                expense = formatCurrency(summary.todayExpense, currencySymbol),
-                net = formatSignedAmount(todayNet, currencySymbol),
-                netAccent = if (todayNet >= 0) AccentBlue else AccentOrange,
-            )
-        }
-        item { SectionHeader("Quick actions", "") }
-        item {
-            QuickActionRow(
-                items = listOf(
-                    HomeQuickActionItem("Accounts", "Cash and banks", HomeElectricBlue, pocketFeatureAssetName("accounts"), pocketFeatureIcon("accounts"), onOpenAccounts),
-                    HomeQuickActionItem("Plans", "Bills and reminders", AccentOrange, pocketFeatureAssetName("plans"), pocketFeatureIcon("plans"), onOpenBudget),
-                    HomeQuickActionItem("Goals", "Savings target", AccentGreen, pocketFeatureAssetName("goals"), pocketFeatureIcon("goals"), onOpenGoals),
-                    HomeQuickActionItem("Reports", "Spending insights", AccentPurple, pocketFeatureAssetName("reports"), pocketFeatureIcon("reports"), onOpenReports),
-                ),
-            )
-        }
-        item {
-            PocketAdBanner(modifier = Modifier.fillMaxWidth())
-        }
-        item { SectionHeader("Money reminders", "") }
-        if (pendingLoanReminders.isNotEmpty() || installmentReminders.isNotEmpty() || monthlyReminders.isNotEmpty()) {
-            items(pendingLoanReminders, key = { it.id }) { reminder ->
-                val remainingAmount = pocketLoanReminderRemainingAmount(reminder)
-                val originalAmount = pocketLoanReminderOriginalAmount(reminder)
-                val settledAmount = pocketLoanReminderSettledAmount(reminder)
-                HomeReminderRow(
-                    icon = if (reminder.kind == "lent") Icons.Rounded.Payments else Icons.AutoMirrored.Rounded.ReceiptLong,
-                    title = if (reminder.kind == "lent") {
-                        "Collect from ${reminder.counterparty.ifBlank { "someone" }}"
-                    } else {
-                        "Pay back to ${reminder.counterparty.ifBlank { "someone" }}"
-                    },
-                    subtitle = if (settledAmount > 0.0 && originalAmount > 0.0) {
-                        "${reminder.dueDate} • ${formatCurrency(remainingAmount, currencySymbol)} left of ${formatCurrency(originalAmount, currencySymbol)}"
-                    } else {
-                        "${reminder.dueDate} • ${formatCurrency(remainingAmount, currencySymbol)}"
-                    },
-                    accent = if (reminder.kind == "lent") AccentGreen else AccentOrange,
-                    onClick = {
-                        onOpenBudgetTarget("loan", reminder.id)
-                    },
-                    actionLabel = if (reminder.kind == "lent") "Get Back" else "Pay Back",
-                    onActionClick = {
-                        onOpenLoanShortcut(
-                            if (reminder.kind == "lent") "receive" else "repay",
-                            reminder.id,
-                            reminder.counterparty,
-                            remainingAmount,
-                            originalAmount,
-                            reminder.dueDate,
-                            reminder.note,
-                        )
-                    },
-                    secondaryActionLabel = "Edit",
-                    onSecondaryActionClick = {
-                        editingLoanReminderFull = reminder
-                    },
-                    tertiaryActionLabel = "Done",
-                    onTertiaryActionClick = {
-                        pendingDoneLoanReminder = reminder
-                    },
-                )
-            }
-            items(installmentReminders, key = { it.id }) { plan ->
-                val remainingInstallments = (plan.totalInstallments - plan.paidInstallments).coerceAtLeast(0)
-                val dueDate = runCatching { LocalDate.parse(plan.nextDueDate) }.getOrNull()
-                val isOverdue = dueDate?.isBefore(LocalDate.now()) == true
-                HomeReminderRow(
-                    icon = Icons.Rounded.CalendarMonth,
-                    title = pocketNormalizeInstallmentTitle(plan.title, plan.categoryLabel),
-                    subtitle = if (isOverdue) {
-                        "Overdue since ${plan.nextDueDate} • ${formatCurrency(plan.installmentAmount, currencySymbol)} • $remainingInstallments left"
-                    } else {
-                        "${plan.nextDueDate} • ${formatCurrency(plan.installmentAmount, currencySymbol)} • ${plan.categoryLabel} • $remainingInstallments left"
-                    },
-                    accent = if (isOverdue) AccentPink else AccentOrange,
-                    onClick = { onOpenBudgetTarget("installment", plan.id) },
-                )
-            }
-            items(monthlyReminders, key = { it.id }) { reminder ->
-                HomeReminderRow(
-                    icon = Icons.Rounded.NotificationsNone,
-                    title = reminder.title,
-                    subtitle = "Every month on ${reminder.dayOfMonth}",
-                    accent = AccentBlue,
-                    onClick = {
-                        if (reminder.kind == "budget" && reminder.linkedBudgetId > 0) {
-                            onOpenBudgetTarget("budget", reminder.linkedBudgetId.toString())
-                        } else {
-                            onOpenBudgetTarget("monthly", reminder.id)
-                        }
-                    },
-                )
-            }
-        } else {
+        item { HomePrimaryAction(onClick = onOpenAdd) }
+        if (thisMonthInstallments.isNotEmpty() || thisMonthLoanReminders.isNotEmpty() || thisMonthMonthlyReminders.isNotEmpty()) {
             item {
-                NativeEmptyCard("No due reminders yet. Open Plans to add monthly bills, installments, or loan follow-up reminders.")
-            }
-        }
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalAlignment = Alignment.Top,
-            ) {
-                InsightStrip(
-                    title = "Budget used",
-                    value = "${summary.budgetUsedPercent}%",
-                    subtitle = "${formatCurrency(summary.budgetSpent, currencySymbol)} spent",
-                    progress = summary.budgetUsedPercent / 100f,
-                    accent = AccentOrange,
-                    modifier = Modifier.weight(1f),
+                DueThisMonthStrip(
+                    installmentCount = thisMonthInstallments.size,
+                    installmentTotal = formatCurrency(thisMonthInstallmentTotal, currencySymbol),
+                    loanCount = thisMonthLoanReminders.size,
+                    loanTotal = formatCurrency(thisMonthLoanTotal, currencySymbol),
+                    monthlyCount = thisMonthMonthlyReminders.size,
+                    nextDueLabel = nextDueLabel,
                     onClick = onOpenBudget,
                 )
-                InsightStrip(
-                    title = "Goal progress",
-                    value = "${summary.goalProgressPercent}%",
-                    subtitle = "${formatCurrency(summary.goalSaved, currencySymbol)} saved",
-                    progress = summary.goalProgressPercent / 100f,
-                    accent = AccentPurple,
-                    modifier = Modifier.weight(1f),
-                    onClick = onOpenGoals,
-                )
-            }
-        }
-        item {
-            SectionHeader("Top spending", "")
-        }
-        item {
-            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (analyticsCategories.isEmpty()) {
-                    Text("Expense insights will appear here after you add a few records.", color = TextSecondary)
-                } else {
-                    analyticsCategories.forEach { item ->
-                        FlatAnalyticsRow(item = item, currencySymbol = currencySymbol, onClick = onOpenReports)
-                    }
-                }
             }
         }
         item {
@@ -487,7 +337,7 @@ fun HomeNativeScreen(
                 }
             }
         }
-        items(recentItems.take(4)) { item ->
+        items(recentItems.take(5)) { item ->
             RecentActivityRow(
                 item = item,
                 currencySymbol = currencySymbol,
@@ -680,8 +530,8 @@ private fun DueThisMonthStrip(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Due this month", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                NativeInlineInfoButton(title = "Due this month", message = dueInfo)
+                Text("Needs attention", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                NativeInlineInfoButton(title = "Needs attention", message = dueInfo)
             }
             Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(18.dp))
         }
@@ -1062,6 +912,43 @@ private fun SectionHeader(title: String, subtitle: String, modifier: Modifier = 
         Text(title, color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         if (subtitle.isNotBlank()) {
             NativeInlineInfoButton(title = title, message = subtitle)
+        }
+    }
+}
+
+@Composable
+private fun HomePrimaryAction(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        color = AccentBlue,
+        shape = RoundedCornerShape(18.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Add,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(22.dp),
+            )
+            Text(
+                text = "Add transaction",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                imageVector = Icons.Rounded.ChevronRight,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.82f),
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }
