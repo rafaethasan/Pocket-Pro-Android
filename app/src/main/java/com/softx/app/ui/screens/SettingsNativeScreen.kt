@@ -295,9 +295,9 @@ private fun SectionHeader(
     title: String,
     subtitle: String,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
-        Text(subtitle, color = TextSecondary, lineHeight = 21.sp)
+        NativeInlineInfoButton(title = title, message = subtitle)
     }
 }
 
@@ -324,12 +324,12 @@ private fun SettingsActionCard(
                 contentDescription = null,
                 tint = accent,
             )
-            Column(
+            Row(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(subtitle, color = TextSecondary, lineHeight = 20.sp)
+                NativeInlineInfoButton(title = title, message = subtitle)
             }
             Text(
                 text = actionLabel,
@@ -364,12 +364,12 @@ private fun SettingsChoiceCard(
                 contentDescription = null,
                 tint = accent,
             )
-            Column(
+            Row(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(subtitle, color = TextSecondary, lineHeight = 20.sp)
+                NativeInlineInfoButton(title = title, message = subtitle)
             }
             Text(
                 text = if (selected) "Selected" else "Choose",

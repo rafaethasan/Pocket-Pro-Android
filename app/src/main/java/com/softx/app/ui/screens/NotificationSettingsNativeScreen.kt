@@ -127,25 +127,24 @@ private fun NotificationSettingsRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            color = TextPrimary,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
+        Row(
             modifier = Modifier.weight(1f),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+            )
+            NativeInlineInfoButton(title = title, message = subtitle)
+        }
         Text(
             text = stateLabel,
             color = accent,
             fontWeight = FontWeight.SemiBold,
         )
     }
-    Text(
-        text = subtitle,
-        color = TextSecondary,
-        lineHeight = 20.sp,
-        modifier = Modifier.padding(horizontal = 18.dp),
-    )
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
         color = TextSecondary.copy(alpha = 0.12f),

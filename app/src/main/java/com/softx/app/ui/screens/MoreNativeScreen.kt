@@ -230,13 +230,13 @@ private fun MorePrimaryActionRow(
                 tint = accent,
                 modifier = Modifier.size(22.dp),
             )
-            Column(
+            Row(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 if (subtitle.isNotBlank()) {
-                    Text(subtitle, color = TextSecondary, lineHeight = 21.sp)
+                    NativeInlineInfoButton(title = title, message = subtitle)
                 }
             }
             trailing?.invoke()
