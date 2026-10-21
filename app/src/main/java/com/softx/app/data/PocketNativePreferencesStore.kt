@@ -112,7 +112,7 @@ data class PocketNativePreferenceSnapshot(
     val hasSeenOnboarding: Boolean,
     val hasCompletedInitialSetup: Boolean,
     val nightlyReminderEnabled: Boolean = true,
-    val nightlyReminderHour: Int = 21,
+    val nightlyReminderHour: Int = 22,
     val notificationSoundEnabled: Boolean = true,
     val notificationVibrationEnabled: Boolean = true,
     val monthlyReminders: List<PocketNativeMonthlyReminder>,
@@ -227,7 +227,7 @@ class PocketNativePreferencesStore(
 
     fun nightlyReminderEnabled(): Boolean = prefs.getBoolean(KEY_NIGHTLY_REMINDER_ENABLED, true)
 
-    fun nightlyReminderHour(): Int = prefs.getInt(KEY_NIGHTLY_REMINDER_HOUR, 21).coerceIn(6, 23)
+    fun nightlyReminderHour(): Int = prefs.getInt(KEY_NIGHTLY_REMINDER_HOUR, 22).coerceIn(6, 23)
 
     fun notificationSoundEnabled(): Boolean = prefs.getBoolean(KEY_NOTIFICATION_SOUND_ENABLED, true)
 

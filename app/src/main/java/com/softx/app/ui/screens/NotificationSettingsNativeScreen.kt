@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.softx.app.PocketReminderScheduler
 import com.softx.app.data.PocketNativePreferencesStore
-import com.softx.app.ui.theme.AccentBlue
 import com.softx.app.ui.theme.AccentGreen
 import com.softx.app.ui.theme.AccentOrange
 import com.softx.app.ui.theme.AccentPurple
@@ -37,7 +35,6 @@ fun NotificationSettingsNativeScreen(
 ) {
     val context = LocalContext.current
     var reminderEnabled by remember { mutableStateOf(preferencesStore.nightlyReminderEnabled()) }
-    var reminderHour by remember { mutableStateOf(preferencesStore.nightlyReminderHour()) }
     var soundEnabled by remember { mutableStateOf(preferencesStore.notificationSoundEnabled()) }
     var vibrationEnabled by remember { mutableStateOf(preferencesStore.notificationVibrationEnabled()) }
 
@@ -60,7 +57,7 @@ fun NotificationSettingsNativeScreen(
         item {
             NotificationSettingsRow(
                 title = "Nightly smart reminder",
-                subtitle = "Daily smart reminder for bills, plans, due follow-ups, and missing entries.",
+                subtitle = "Every day at 10:00 PM in this phone's local time, even when the app is closed.",
                 accent = AccentPurple,
                 stateLabel = if (reminderEnabled) "On" else "Off",
                 onClick = {
@@ -76,27 +73,8 @@ fun NotificationSettingsNativeScreen(
             )
         }
         item {
-            SectionLabel(title = "Reminder time", trailing = formatReminderHour(reminderHour))
-        }
-        items(listOf(19, 20, 21, 22, 23)) { hour ->
-            NotificationSettingsRow(
-                title = formatReminderHour(hour),
-                subtitle = when (hour) {
-                    19 -> "Early evening reminder"
-                    20 -> "Calm evening reminder"
-                    21 -> "Default nightly check-in"
-                    22 -> "Late evening reminder"
-                    else -> "Final reminder before sleep"
-                },
-                accent = AccentBlue,
-                stateLabel = if (reminderHour == hour) "Selected" else "Choose",
-                onClick = {
-                    reminderHour = hour
-                    preferencesStore.setNightlyReminderHour(hour)
-                    if (preferencesStore.nightlyReminderEnabled()) {
-                        PocketReminderScheduler.ensureDailyReminder(context)
-                    }
-                },
+            NativeEmptyCard(
+                "Daily check-in is fixed at 10:00 PM based on the phone's current time zone. It automatically adjusts when the user travels or changes time zones.",
             )
         }
         item {
@@ -133,7 +111,6 @@ fun NotificationSettingsNativeScreen(
         }
     }
 }
-
 @Composable
 private fun NotificationSettingsRow(
     title: String,
@@ -173,11 +150,4 @@ private fun NotificationSettingsRow(
         modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
         color = TextSecondary.copy(alpha = 0.12f),
     )
-}
-
-private fun formatReminderHour(hour: Int): String = when (hour.coerceIn(0, 23)) {
-    0 -> "12:00 AM"
-    in 1..11 -> "${hour}:00 AM"
-    12 -> "12:00 PM"
-    else -> "${hour - 12}:00 PM"
 }

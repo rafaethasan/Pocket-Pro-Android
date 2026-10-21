@@ -13,6 +13,7 @@ import java.util.Calendar
 private const val POCKET_REMINDER_CHANNEL_ID = "pocket_daily_reminder"
 private const val POCKET_REMINDER_CHANNEL_NAME = "Pocket Pro Reminders"
 private const val POCKET_REMINDER_REQUEST_CODE = 2200
+private const val POCKET_NIGHTLY_REMINDER_HOUR = 22
 
 object PocketReminderScheduler {
     fun ensureDailyReminder(context: Context) {
@@ -26,7 +27,7 @@ object PocketReminderScheduler {
         }
         alarmManager.setInexactRepeating(
             AlarmManager.RTC_WAKEUP,
-            nextReminderAtMillis(preferencesStore.nightlyReminderHour()),
+            nextReminderAtMillis(),
             AlarmManager.INTERVAL_DAY,
             pendingIntent,
         )
@@ -62,9 +63,14 @@ object PocketReminderScheduler {
         )
     }
 
-    private fun nextReminderAtMillis(hourOfDay: Int): Long {
+    /**
+     * Calendar.getInstance() uses the device's current time zone. That makes the
+     * reminder 10:00 PM in each user's local country time rather than a fixed
+     * Bangladesh/server time.
+     */
+    private fun nextReminderAtMillis(): Long {
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hourOfDay.coerceIn(6, 23))
+            set(Calendar.HOUR_OF_DAY, POCKET_NIGHTLY_REMINDER_HOUR)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
