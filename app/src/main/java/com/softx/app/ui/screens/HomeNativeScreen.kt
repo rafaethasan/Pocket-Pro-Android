@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.BarChart
@@ -45,6 +46,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -1194,6 +1196,7 @@ private fun QuickActionRow(items: List<HomeQuickActionItem>) {
 
 @Composable
 private fun ActionTile(item: HomeQuickActionItem, modifier: Modifier = Modifier) {
+    var showInfo by remember(item.title) { mutableStateOf(false) }
     Card(
         onClick = item.onClick,
         modifier = modifier,
@@ -1220,15 +1223,45 @@ private fun ActionTile(item: HomeQuickActionItem, modifier: Modifier = Modifier)
                     modifier = Modifier.size(30.dp),
                 )
             }
-            Text(
-                item.title,
-                color = TextPrimary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    item.title,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                IconButton(
+                    onClick = { showInfo = true },
+                    modifier = Modifier.size(26.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = "About ${item.title}",
+                        tint = TextSecondary,
+                        modifier = Modifier.size(15.dp),
+                    )
+                }
+            }
         }
+    }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text("Got it", color = AccentBlue, fontWeight = FontWeight.SemiBold)
+                }
+            },
+            title = { Text(item.title, color = TextPrimary, fontWeight = FontWeight.Bold) },
+            text = { Text(item.subtitle, color = TextSecondary, lineHeight = 20.sp) },
+            containerColor = SurfaceCard,
+            shape = RoundedCornerShape(20.dp),
+        )
     }
 }
 
