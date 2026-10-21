@@ -80,12 +80,13 @@ fun MoreNativeScreen(
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("More", color = TextPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp)
-                    Text(
-                        "Tools, alerts, exports, search, and app controls in one clean place.",
-                        color = TextSecondary,
-                        lineHeight = 20.sp,
+                    NativeInlineInfoButton(
+                        title = "More",
+                        message = "Tools, alerts, exports, search, and app controls in one clean place.",
                     )
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                 }
             }

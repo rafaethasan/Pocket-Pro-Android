@@ -146,12 +146,13 @@ fun ReportsNativeScreen(
                     .padding(horizontal = 18.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text("Reports", color = TextPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp)
-                Text(
-                    "See summary, budget progress, categories and weekly spending in one place.",
-                    color = TextSecondary,
-                    lineHeight = 20.sp,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Reports", color = TextPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp)
+                    NativeInlineInfoButton(
+                        title = "Reports",
+                        message = "See summary, budget progress, categories and weekly spending in one place.",
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -162,16 +163,14 @@ fun ReportsNativeScreen(
                 ) {
                     Icon(Icons.Rounded.CalendarMonth, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(18.dp))
                     Text("Calendar View", color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                    NativeInlineInfoButton(
+                        title = "Calendar View",
+                        message = "Monthly calendar, guided insights, and advanced analytics are free for everyone.",
+                    )
                     if (!calendarGate.granted) {
                         PocketNativeProBadge()
                     }
                 }
-                Text(
-                    "Monthly calendar, guided insights, and advanced analytics are free for everyone.",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    lineHeight = 18.sp,
-                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

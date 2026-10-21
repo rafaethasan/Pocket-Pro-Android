@@ -105,12 +105,12 @@ private fun HelpSupportRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(imageVector = icon, contentDescription = null, tint = accent)
-        androidx.compose.foundation.layout.Column(
+        Row(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(subtitle, color = TextSecondary, lineHeight = 20.sp)
+            NativeInlineInfoButton(title = title, message = subtitle)
         }
     }
     HorizontalDivider(

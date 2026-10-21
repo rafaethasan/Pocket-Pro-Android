@@ -147,9 +147,11 @@ fun NativeGradientHeroCard(
                 .padding(22.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Text(title, color = TextPrimary, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
-            if (subtitle.isNotBlank()) {
-                Text(subtitle, color = TextPrimary.copy(alpha = 0.82f), lineHeight = 22.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, color = TextPrimary, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+                if (subtitle.isNotBlank()) {
+                    NativeInlineInfoButton(title = title, message = subtitle)
+                }
             }
             content()
         }
