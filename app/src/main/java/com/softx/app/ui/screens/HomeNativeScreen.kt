@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -201,13 +204,14 @@ fun HomeNativeScreen(
         }.filter { !it.isBefore(currentMonth) }
         dueDates.minOrNull()?.toString().orEmpty()
     }
+    val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
     LazyColumn(
         modifier = Modifier.padding(horizontal = 18.dp),
         contentPadding = PaddingValues(bottom = 264.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        item { Spacer(modifier = Modifier.height(18.dp)) }
+        item { Spacer(modifier = Modifier.height(statusBarPadding + 18.dp)) }
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -661,15 +665,15 @@ private fun DueThisMonthStrip(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            HeroMiniMetric("Installments", "$installmentCount • $installmentTotal", Modifier.weight(1f))
-            HeroMiniMetric("Loans", "$loanCount • $loanTotal", Modifier.weight(1f))
-            HeroMiniMetric("Bills", monthlyCount.toString(), Modifier.weight(1f))
+            HeroMiniMetric("Installments", "$installmentCount • $installmentTotal", Modifier.weight(1f), TextSecondary, TextPrimary)
+            HeroMiniMetric("Loans", "$loanCount • $loanTotal", Modifier.weight(1f), TextSecondary, TextPrimary)
+            HeroMiniMetric("Bills", monthlyCount.toString(), Modifier.weight(1f), TextSecondary, TextPrimary)
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(Color.White.copy(alpha = 0.06f)),
+                .background(TextSecondary.copy(alpha = 0.12f)),
         )
     }
 }
@@ -1084,7 +1088,13 @@ private fun HeaderActionButton(
 }
 
 @Composable
-private fun HeroMiniMetric(title: String, value: String, modifier: Modifier = Modifier) {
+private fun HeroMiniMetric(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    titleColor: Color = Color.White.copy(alpha = 0.56f),
+    valueColor: Color = Color.White,
+) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -1092,8 +1102,8 @@ private fun HeroMiniMetric(title: String, value: String, modifier: Modifier = Mo
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text(title, color = Color.White.copy(alpha = 0.56f), fontWeight = FontWeight.Medium, fontSize = 10.sp)
-        Text(value, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Text(title, color = titleColor, fontWeight = FontWeight.Medium, fontSize = 10.sp)
+        Text(value, color = valueColor, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
