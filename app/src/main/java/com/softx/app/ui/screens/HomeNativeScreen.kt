@@ -38,6 +38,8 @@ import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.foundation.BorderStroke
@@ -121,6 +123,7 @@ fun HomeNativeScreen(
     val preferencesStore = remember { PocketNativePreferencesStore(context) }
     var loading by remember { mutableStateOf(true) }
     var errorText by remember { mutableStateOf("") }
+    var isBalanceVisible by remember { mutableStateOf(false) }
     var dashboardResponse by remember { mutableStateOf<PocketNativeDashboardResponse?>(null) }
     var liveLoanDueReminders by remember { mutableStateOf(preferencesStore.loanDueReminders()) }
     var selectedLoanReminderAction by remember { mutableStateOf<PocketNativeLoanDueReminder?>(null) }
@@ -272,14 +275,32 @@ fun HomeNativeScreen(
                 ) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Available balance", color = Color.White.copy(alpha = 0.68f), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("Available balance", color = Color.White.copy(alpha = 0.68f), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                                IconButton(
+                                    onClick = { isBalanceVisible = !isBalanceVisible },
+                                    modifier = Modifier.size(30.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = if (isBalanceVisible) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
+                                        contentDescription = if (isBalanceVisible) "Hide available balance" else "Show available balance",
+                                        tint = Color.White.copy(alpha = 0.78f),
+                                        modifier = Modifier.size(17.dp),
+                                    )
+                                }
+                            }
                             Text(
-                                text = formatCurrency(summary.totalBalance, currencySymbol),
+                                text = if (isBalanceVisible) formatCurrency(summary.totalBalance, currencySymbol) else "$currencySymbol ****",
                                 color = Color.White,
                                 fontSize = 34.sp,
                                 fontWeight = FontWeight.Black,
+                                modifier = Modifier.clickable { isBalanceVisible = !isBalanceVisible },
                             )
-                            Text("All accounts combined", color = Color.White.copy(alpha = 0.48f), fontSize = 10.sp)
+                            Text(
+                                if (isBalanceVisible) "All accounts combined" else "Tap balance to show",
+                                color = Color.White.copy(alpha = 0.48f),
+                                fontSize = 10.sp,
+                            )
                         }
                     }
                     Box(
