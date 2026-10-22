@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpCenter
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Badge
@@ -62,6 +63,7 @@ fun MoreNativeScreen(
     onOpenSearch: () -> Unit,
     onOpenAccounts: () -> Unit,
     onOpenExportCenter: () -> Unit,
+    onOpenUserGuide: () -> Unit,
     onOpenHelpSupport: () -> Unit,
     onOpenDataTools: () -> Unit,
 ) {
@@ -187,6 +189,13 @@ fun MoreNativeScreen(
                     accent = AccentBlue,
                     icon = Icons.Rounded.AccountBalanceWallet,
                     onClick = onOpenAccounts,
+                )
+                MorePrimaryActionRow(
+                    title = "User guide",
+                    subtitle = "A complete Pocket Pro walkthrough, from your first entry to backup and reports.",
+                    accent = AccentBlue,
+                    icon = Icons.AutoMirrored.Rounded.MenuBook,
+                    onClick = onOpenUserGuide,
                 )
                 MorePrimaryActionRow(
                     title = "Help & support",

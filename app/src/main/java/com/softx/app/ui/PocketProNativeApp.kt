@@ -99,6 +99,7 @@ import com.softx.app.ui.screens.DataToolsNativeScreen
 import com.softx.app.ui.screens.InitialSetupScreen
 import com.softx.app.ui.screens.LoginScreen
 import com.softx.app.ui.screens.MoreNativeScreen
+import com.softx.app.ui.screens.UserGuideNativeScreen
 import com.softx.app.ui.screens.OnboardingSlidesScreen
 import com.softx.app.ui.screens.PocketBrandBadge
 import com.softx.app.ui.screens.ProfileNativeScreen
@@ -155,6 +156,7 @@ private enum class NativeFeatureScreen {
     AppLock,
     NotificationSettings,
     ExportCenter,
+    UserGuide,
     HelpSupport,
     DataTools,
     Calendar,
@@ -803,6 +805,10 @@ private fun NativeShell(
                     onBack = { featureScreen = null },
                 )
 
+                NativeFeatureScreen.UserGuide -> UserGuideNativeScreen(
+                    onBack = { featureScreen = null },
+                )
+
                 NativeFeatureScreen.DataTools -> DataToolsNativeScreen(
                     repository = repository,
                     onBack = { featureScreen = null },
@@ -1030,6 +1036,7 @@ private fun NativeShell(
                             onOpenSearch = { showSearchOverlay = true },
                             onOpenAccounts = { featureScreen = NativeFeatureScreen.Accounts },
                             onOpenExportCenter = { featureScreen = NativeFeatureScreen.ExportCenter },
+                            onOpenUserGuide = { featureScreen = NativeFeatureScreen.UserGuide },
                             onOpenHelpSupport = { featureScreen = NativeFeatureScreen.HelpSupport },
                             onOpenDataTools = { featureScreen = NativeFeatureScreen.DataTools },
                         )
