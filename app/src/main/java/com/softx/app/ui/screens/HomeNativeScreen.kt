@@ -354,6 +354,39 @@ fun HomeNativeScreen(
                         HeroMiniMetric("Expense", formatCurrency(summary.monthExpense, currencySymbol), Modifier.weight(1f))
                         HeroMiniMetric("Net", formatSignedAmount(summary.totalBalance, currencySymbol), Modifier.weight(1f))
                     }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onOpenAdd,
+                        color = Color.White.copy(alpha = 0.16f),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.20f)),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(21.dp),
+                            )
+                            Text(
+                                text = "Add transaction",
+                                color = Color.White,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Icon(
+                                imageVector = Icons.Rounded.ChevronRight,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.90f),
+                                modifier = Modifier.size(19.dp),
+                            )
+                        }
+                    }
                     }
                 }
             }
@@ -368,7 +401,6 @@ fun HomeNativeScreen(
                 ),
             )
         }
-        item { HomePrimaryAction(onClick = onOpenAdd) }
         if (thisMonthInstallments.isNotEmpty() || thisMonthLoanReminders.isNotEmpty() || thisMonthMonthlyReminders.isNotEmpty()) {
             item {
                 DueThisMonthStrip(
