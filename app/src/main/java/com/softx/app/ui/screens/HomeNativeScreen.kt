@@ -32,6 +32,7 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.NotificationsActive
@@ -173,6 +174,10 @@ fun HomeNativeScreen(
     val greetingName = rawGreetingName.takeUnless {
         it.equals("Pocket", ignoreCase = true) || it.equals("Pocket Pro", ignoreCase = true)
     }.orEmpty()
+    val cardholderName = user?.fullName?.trim()
+        ?.takeIf { it.isNotBlank() && !it.equals("Pocket", ignoreCase = true) && !it.equals("Pocket Pro", ignoreCase = true) }
+        ?: user?.username?.trim()?.takeIf { it.isNotBlank() && !it.equals("pocket", ignoreCase = true) }
+        ?: "Your wallet"
     val greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
         in 5..11 -> "Good morning"
         in 12..16 -> "Good afternoon"
@@ -318,6 +323,38 @@ fun HomeNativeScreen(
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(
+                                text = "POCKET PRO",
+                                color = Color.White.copy(alpha = 0.66f),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp,
+                            )
+                            Text(
+                                text = cardholderName,
+                                color = Color.White,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                        Surface(
+                            color = Color.White.copy(alpha = 0.16f),
+                            shape = RoundedCornerShape(14.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CreditCard,
+                                contentDescription = "Pocket Pro card",
+                                tint = Color.White,
+                                modifier = Modifier.padding(9.dp).size(22.dp),
+                            )
+                        }
+                    }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
