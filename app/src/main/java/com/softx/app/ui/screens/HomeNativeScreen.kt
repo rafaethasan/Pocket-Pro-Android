@@ -333,11 +333,6 @@ fun HomeNativeScreen(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
                             )
-                            Text(
-                                text = "Your everyday money",
-                                color = Color.White.copy(alpha = 0.62f),
-                                fontSize = 10.sp,
-                            )
                         }
                         WalletChip()
                     }
