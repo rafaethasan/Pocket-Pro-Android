@@ -39,8 +39,10 @@ import com.softx.app.data.PocketNativePreferencesStore
 import com.softx.app.ui.theme.AccentBlue
 import com.softx.app.ui.theme.AccentGreen
 import com.softx.app.ui.theme.AccentPurple
-import com.softx.app.ui.theme.TextPrimary
-import com.softx.app.ui.theme.TextSecondary
+
+private val SetupTitle = Color(0xFFF8FAFF)
+private val SetupBody = Color(0xFFD6E1F8)
+private val SetupCard = Color(0xFF1B2A4A)
 
 @Composable
 fun InitialSetupScreen(
@@ -88,8 +90,8 @@ fun InitialSetupScreen(
                 if (step == 1) {
                     TextButton(onClick = { step = 0 }) {
                         Row {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = TextPrimary)
-                            Text("Back", color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = SetupTitle)
+                            Text("Back", color = SetupTitle, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 } else {
@@ -103,7 +105,7 @@ fun InitialSetupScreen(
                     Text(
                         text = if (step == 0) "Step 1 of 2" else "Step 2 of 2",
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                        color = if (step == 0) AccentBlue else AccentGreen,
+                    color = Color.White,
                         fontWeight = FontWeight.Bold,
                     )
                 }
@@ -116,8 +118,16 @@ fun InitialSetupScreen(
             )
 
             Text(
+                text = "Personal money manager",
+                color = SetupBody.copy(alpha = 0.88f),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
+
+            Text(
                 text = if (step == 0) "Choose your language" else "Choose your currency",
-                color = TextPrimary,
+                color = SetupTitle,
                 fontSize = 30.sp,
                 lineHeight = 36.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -128,12 +138,12 @@ fun InitialSetupScreen(
                 } else {
                     "Choose the currency you want to use for balances, budgets and reports. The most relevant currencies are shown first."
                 },
-                color = TextSecondary,
+                color = SetupBody,
                 lineHeight = 24.sp,
             )
 
             Surface(
-                color = Color.White.copy(alpha = 0.06f),
+                color = SetupCard.copy(alpha = 0.92f),
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -156,7 +166,7 @@ fun InitialSetupScreen(
                     Column {
                         Text(
                             text = if (step == 0) "Current language" else "Current currency",
-                            color = TextSecondary,
+                            color = SetupBody,
                             fontSize = 13.sp,
                         )
                         Text(
@@ -166,7 +176,7 @@ fun InitialSetupScreen(
                                 val option = PocketNativePreferencesStore.currencyOptionFor(selectedCurrency)
                                 "${option.code} • ${option.label}"
                             },
-                            color = TextPrimary,
+                            color = SetupTitle,
                             fontWeight = FontWeight.Bold,
                             fontSize = 17.sp,
                         )
@@ -236,7 +246,7 @@ private fun SetupChoiceCard(
     onClick: () -> Unit,
 ) {
     Surface(
-        color = Color.White.copy(alpha = 0.07f),
+        color = SetupCard.copy(alpha = 0.88f),
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
@@ -254,24 +264,24 @@ private fun SetupChoiceCard(
             ) {
                 Text(
                     text = title,
-                    color = TextPrimary,
+                    color = SetupTitle,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
                 )
                 Text(
                     text = subtitle,
-                    color = TextSecondary,
+                    color = SetupBody,
                     fontSize = 14.sp,
                 )
             }
             Surface(
-                color = if (selected) AccentGreen.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.06f),
+                color = if (selected) AccentGreen.copy(alpha = 0.24f) else Color.White.copy(alpha = 0.12f),
                 shape = RoundedCornerShape(14.dp),
             ) {
                 Text(
                     text = if (selected) "Selected" else "Choose",
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                    color = if (selected) AccentGreen else TextSecondary,
+                    color = if (selected) Color(0xFF70F0C1) else SetupBody,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
                 )

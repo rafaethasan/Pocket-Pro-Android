@@ -34,8 +34,9 @@ import androidx.compose.ui.unit.sp
 import com.softx.app.BuildConfig
 import com.softx.app.ui.theme.AccentPink
 import com.softx.app.ui.theme.AccentPurple
-import com.softx.app.ui.theme.TextPrimary
-import com.softx.app.ui.theme.TextSecondary
+
+private val WelcomeTitle = Color(0xFFFFFFFF)
+private val WelcomeBody = Color(0xFFE5D8F3)
 
 @Composable
 fun GetStartedScreen(
@@ -76,7 +77,7 @@ fun GetStartedScreen(
                 Spacer(modifier = Modifier.height(26.dp))
                 Text(
                     text = "Pocket Pro",
-                    color = TextPrimary,
+                    color = WelcomeTitle,
                     fontSize = 34.sp,
                     fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.Center,
@@ -84,7 +85,7 @@ fun GetStartedScreen(
                 Spacer(modifier = Modifier.padding(top = 14.dp))
                 Text(
                     text = "Track daily expenses, income, budgets, goals and reports with a clean flow that feels easy from the first tap.",
-                    color = TextSecondary,
+                    color = WelcomeBody,
                     fontSize = 18.sp,
                     lineHeight = 28.sp,
                     textAlign = TextAlign.Center,
@@ -111,7 +112,7 @@ fun GetStartedScreen(
                     onClick = onRegister,
                     modifier = Modifier.fillMaxWidth(),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(22.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = WelcomeTitle),
                     border = androidx.compose.foundation.BorderStroke(
                         width = 1.dp,
                         color = Color.White.copy(alpha = 0.22f),
@@ -149,7 +150,7 @@ fun GetStartedScreen(
 
                 Text(
                     text = "By continuing, you agree to the Pocket Pro Terms of Use and Privacy Policy.",
-                    color = TextSecondary,
+                    color = WelcomeBody,
                     lineHeight = 22.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
