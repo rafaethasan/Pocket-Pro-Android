@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -99,8 +100,11 @@ import java.util.Calendar
 import java.util.Locale
 
 private val HomeElectricBlue = Color(0xFF36B7F5)
-private val HomeFooterBlue = Color(0xFF3774FF)
-private val HomeFooterBlueDeep = Color(0xFF2454D6)
+private val HomeFooterBlue = Color(0xFF2672FF)
+private val HomeFooterBlueDeep = Color(0xFF6848E8)
+private val HomeBackgroundTop = Color(0xFFEAF2FF)
+private val HomeBackgroundMid = Color(0xFFF6F3FF)
+private val HomeBackgroundBottom = Color(0xFFEFF5FF)
 
 @Composable
 fun HomeNativeScreen(
@@ -221,11 +225,22 @@ fun HomeNativeScreen(
     }
     val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
-    LazyColumn(
-        modifier = Modifier.padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(bottom = 264.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(HomeBackgroundTop, HomeBackgroundMid, HomeBackgroundBottom),
+                ),
+            ),
     ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 18.dp),
+            contentPadding = PaddingValues(bottom = 264.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
         item { Spacer(modifier = Modifier.height(statusBarPadding + 18.dp)) }
         item {
             Row(
@@ -380,7 +395,8 @@ fun HomeNativeScreen(
                 onClick = { onOpenRecentActivity(item) },
             )
         }
-        item { Spacer(modifier = Modifier.height(8.dp)) }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+        }
     }
 
     editingLoanReminder?.let { reminder ->
@@ -1005,8 +1021,9 @@ private fun HeaderActionButton(
         modifier = Modifier
             .size(54.dp)
             .clickable(onClick = onClick),
-        color = SurfaceCard,
+        color = Color(0xFFF0F4FF),
         shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, Color(0xFFDCE6FF)),
     ) {
         Box(contentAlignment = Alignment.Center) {
             PocketSvgIcon(
