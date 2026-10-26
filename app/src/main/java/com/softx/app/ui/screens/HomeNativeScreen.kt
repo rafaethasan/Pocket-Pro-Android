@@ -1275,13 +1275,16 @@ private fun HomeErrorCard(errorText: String) {
 
 @Composable
 private fun RecentActivityRow(item: PocketNativeRecentActivity, currencySymbol: String, onClick: () -> Unit) {
+    val activityColor = parseColor(item.colorHex)
+    val detailLabel = item.note.takeIf { it.isNotBlank() && it != item.date }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(SurfaceCard.copy(alpha = 0.38f))
+            .clip(RoundedCornerShape(22.dp))
+            .background(SurfaceCard)
+            .border(1.dp, Color(0xFFDFE8FC), RoundedCornerShape(22.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 15.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
@@ -1290,17 +1293,36 @@ private fun RecentActivityRow(item: PocketNativeRecentActivity, currencySymbol: 
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(homeActivityIcon(item), contentDescription = null, tint = parseColor(item.colorHex), modifier = Modifier.size(20.dp))
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(15.dp))
+                        .background(activityColor.copy(alpha = 0.13f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = homeActivityIcon(item),
+                        contentDescription = null,
+                        tint = activityColor,
+                        modifier = Modifier.size(23.dp),
+                    )
+                }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(item.label, color = TextPrimary, fontWeight = FontWeight.Bold)
-                    Text(item.note.ifBlank { item.date }, color = TextSecondary)
+                    Text(item.label, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(detailLabel ?: item.date, color = TextSecondary, fontSize = 13.sp)
                 }
             }
-            Text(
-                text = formatSignedAmount(item.amount, currencySymbol),
-                color = if (item.amount >= 0) AccentGreen else AccentPink,
-                fontWeight = FontWeight.Bold,
-            )
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = formatSignedAmount(item.amount, currencySymbol),
+                    color = if (item.amount >= 0) AccentGreen else AccentPink,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                )
+                if (detailLabel != null) {
+                    Text(item.date, color = TextSecondary, fontSize = 11.sp)
+                }
+            }
         }
     }
 }
