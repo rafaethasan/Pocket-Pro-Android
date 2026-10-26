@@ -32,7 +32,6 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.NotificationsActive
@@ -102,8 +101,8 @@ import java.util.Calendar
 import java.util.Locale
 
 private val HomeElectricBlue = Color(0xFF36B7F5)
-private val HomeFooterBlue = Color(0xFF2672FF)
-private val HomeFooterBlueDeep = Color(0xFF6848E8)
+private val HomeFooterBlue = Color(0xFF148A5B)
+private val HomeFooterBlueDeep = Color(0xFF58C979)
 private val HomeBackgroundTop = Color(0xFFEAF2FF)
 private val HomeBackgroundMid = Color(0xFFF6F3FF)
 private val HomeBackgroundBottom = Color(0xFFEFF5FF)
@@ -174,10 +173,10 @@ fun HomeNativeScreen(
     val greetingName = rawGreetingName.takeUnless {
         it.equals("Pocket", ignoreCase = true) || it.equals("Pocket Pro", ignoreCase = true)
     }.orEmpty()
-    val cardholderName = user?.fullName?.trim()
+    val displayName = user?.fullName?.trim()
         ?.takeIf { it.isNotBlank() && !it.equals("Pocket", ignoreCase = true) && !it.equals("Pocket Pro", ignoreCase = true) }
         ?: user?.username?.trim()?.takeIf { it.isNotBlank() && !it.equals("pocket", ignoreCase = true) }
-        ?: "Your wallet"
+        ?: "Pocket Guest"
     val greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
         in 5..11 -> "Good morning"
         in 12..16 -> "Good afternoon"
@@ -267,7 +266,7 @@ fun HomeNativeScreen(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 12.sp,
                         )
-                        Text("Pocket Pro", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                        Text(displayName, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -325,35 +324,22 @@ fun HomeNativeScreen(
                     ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "POCKET PRO",
-                                color = Color.White.copy(alpha = 0.66f),
-                                fontSize = 10.sp,
+                                text = "Main wallet",
+                                color = Color.White.copy(alpha = 0.92f),
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp,
+                                fontSize = 13.sp,
                             )
                             Text(
-                                text = cardholderName,
-                                color = Color.White,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                text = "Your everyday money",
+                                color = Color.White.copy(alpha = 0.62f),
+                                fontSize = 10.sp,
                             )
                         }
-                        Surface(
-                            color = Color.White.copy(alpha = 0.16f),
-                            shape = RoundedCornerShape(14.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.CreditCard,
-                                contentDescription = "Pocket Pro card",
-                                tint = Color.White,
-                                modifier = Modifier.padding(9.dp).size(22.dp),
-                            )
-                        }
+                        WalletChip()
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1186,6 +1172,32 @@ private fun HeaderActionButton(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun WalletChip() {
+    Box(
+        modifier = Modifier
+            .width(35.dp)
+            .height(26.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(Color(0xFFFFD46A).copy(alpha = 0.92f))
+            .border(1.dp, Color.White.copy(alpha = 0.38f), RoundedCornerShape(6.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color(0xFF8A6111).copy(alpha = 0.62f)),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 11.dp, vertical = 3.dp)
+                .border(1.dp, Color(0xFF8A6111).copy(alpha = 0.50f), RoundedCornerShape(2.dp)),
+        )
     }
 }
 
