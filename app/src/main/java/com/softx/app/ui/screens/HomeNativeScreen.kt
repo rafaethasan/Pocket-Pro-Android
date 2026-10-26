@@ -101,8 +101,8 @@ import java.util.Calendar
 import java.util.Locale
 
 private val HomeElectricBlue = Color(0xFF36B7F5)
-private val HomeFooterBlue = Color(0xFF148A5B)
-private val HomeFooterBlueDeep = Color(0xFF58C979)
+private val HomeFooterBlue = Color(0xFF087A50)
+private val HomeFooterBlueDeep = Color(0xFF56C97A)
 private val HomeBackgroundTop = Color(0xFFEAF2FF)
 private val HomeBackgroundMid = Color(0xFFF6F3FF)
 private val HomeBackgroundBottom = Color(0xFFEFF5FF)
@@ -290,7 +290,7 @@ fun HomeNativeScreen(
             Card(
                 modifier = Modifier.clickable(onClick = onOpenAccounts),
                 colors = CardDefaults.cardColors(containerColor = SurfaceCard),
-                shape = RoundedCornerShape(26.dp),
+                shape = RoundedCornerShape(28.dp),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f)),
             ) {
                 Box(
@@ -299,6 +299,8 @@ fun HomeNativeScreen(
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(HomeFooterBlue, HomeFooterBlueDeep),
+                                start = androidx.compose.ui.geometry.Offset.Zero,
+                                end = androidx.compose.ui.geometry.Offset.Infinite,
                             ),
                         ),
                 ) {
@@ -320,7 +322,7 @@ fun HomeNativeScreen(
                     )
                     Column(
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -376,8 +378,8 @@ fun HomeNativeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onOpenAdd,
                         color = Color.White.copy(alpha = 0.16f),
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.20f)),
+                        shape = RoundedCornerShape(18.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.28f)),
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
@@ -1046,9 +1048,10 @@ private fun HomeShortcutRow(items: List<HomeShortcutItem>) {
             Surface(
                 modifier = Modifier.weight(1f),
                 onClick = item.onClick,
-                color = Color.White.copy(alpha = 0.78f),
-                shape = RoundedCornerShape(18.dp),
-                border = BorderStroke(1.dp, item.color.copy(alpha = 0.12f)),
+                color = Color.White.copy(alpha = 0.88f),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, item.color.copy(alpha = 0.16f)),
+                shadowElevation = 2.dp,
             ) {
                 Column(
                     modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
@@ -1207,11 +1210,12 @@ private fun HeroMiniMetric(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.03f))
+            .background(Color.White.copy(alpha = 0.10f))
+            .border(1.dp, Color.White.copy(alpha = 0.07f), RoundedCornerShape(16.dp))
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text(title, color = titleColor, fontWeight = FontWeight.Medium, fontSize = 10.sp)
+        Text(title, color = titleColor.copy(alpha = 0.92f), fontWeight = FontWeight.Medium, fontSize = 10.sp)
         Text(value, color = valueColor, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
