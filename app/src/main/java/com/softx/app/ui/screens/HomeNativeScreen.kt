@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Search
@@ -356,6 +357,16 @@ fun HomeNativeScreen(
                     }
                 }
             }
+        }
+        item {
+            HomeShortcutRow(
+                items = listOf(
+                    HomeShortcutItem("Accounts", Icons.Rounded.AccountBalanceWallet, AccentPurple, onOpenAccounts),
+                    HomeShortcutItem("Records", Icons.AutoMirrored.Rounded.ReceiptLong, AccentBlue, onOpenRecords),
+                    HomeShortcutItem("Plans", Icons.Rounded.CalendarMonth, AccentOrange, onOpenBudget),
+                    HomeShortcutItem("Reports", Icons.Rounded.BarChart, AccentGreen, onOpenReports),
+                ),
+            )
         }
         item { HomePrimaryAction(onClick = onOpenAdd) }
         if (thisMonthInstallments.isNotEmpty() || thisMonthLoanReminders.isNotEmpty() || thisMonthMonthlyReminders.isNotEmpty()) {
@@ -964,6 +975,60 @@ private fun SectionHeader(title: String, subtitle: String, modifier: Modifier = 
         Text(title, color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         if (subtitle.isNotBlank()) {
             NativeInlineInfoButton(title = title, message = subtitle)
+        }
+    }
+}
+
+private data class HomeShortcutItem(
+    val title: String,
+    val icon: ImageVector,
+    val color: Color,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun HomeShortcutRow(items: List<HomeShortcutItem>) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        items.forEach { item ->
+            Surface(
+                modifier = Modifier.weight(1f),
+                onClick = item.onClick,
+                color = Color.White.copy(alpha = 0.78f),
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, item.color.copy(alpha = 0.12f)),
+            ) {
+                Column(
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(7.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(13.dp))
+                            .background(item.color.copy(alpha = 0.13f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.title,
+                            tint = item.color,
+                            modifier = Modifier.size(21.dp),
+                        )
+                    }
+                    Text(
+                        text = item.title,
+                        color = TextPrimary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
         }
     }
 }
