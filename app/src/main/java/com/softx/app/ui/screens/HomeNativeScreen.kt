@@ -164,6 +164,15 @@ fun HomeNativeScreen(
     val dashboard = dashboardResponse!!.dashboard!!
     val summary = dashboard.summary
     val user = dashboardResponse!!.user ?: signedInUser
+    val rawGreetingName = user?.fullName?.trim()?.substringBefore(" ")?.ifBlank { "" }.orEmpty()
+    val greetingName = rawGreetingName.takeUnless {
+        it.equals("Pocket", ignoreCase = true) || it.equals("Pocket Pro", ignoreCase = true)
+    }.orEmpty()
+    val greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+        in 5..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        else -> "Good evening"
+    }
     val currencySymbol = dashboard.currencySymbol
     val analyticsCategories = dashboard.analytics.categories.take(4)
     val recentItems = dashboard.recentActivity.ifEmpty { sampleRecentActivity() }
@@ -230,7 +239,15 @@ fun HomeNativeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     PocketUserAvatar(user = user, size = 52.dp)
-                    Text("Pocket Pro", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = if (greetingName.isNotBlank()) "$greeting, $greetingName" else greeting,
+                            color = AccentBlue,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp,
+                        )
+                        Text("Pocket Pro", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     HeaderActionButton(
@@ -256,17 +273,35 @@ fun HomeNativeScreen(
                 shape = RoundedCornerShape(26.dp),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f)),
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(HomeFooterBlue, HomeFooterBlueDeep),
                             ),
-                        )
-                        .padding(horizontal = 20.dp, vertical = 18.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                        ),
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 0.dp, end = 0.dp)
+                            .size(118.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.10f)),
+                    )
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 44.dp, end = 38.dp)
+                            .size(54.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.08f)),
+                    )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -302,6 +337,7 @@ fun HomeNativeScreen(
                         HeroMiniMetric("Income", formatCurrency(summary.monthIncome, currencySymbol), Modifier.weight(1f))
                         HeroMiniMetric("Expense", formatCurrency(summary.monthExpense, currencySymbol), Modifier.weight(1f))
                         HeroMiniMetric("Net", formatSignedAmount(summary.totalBalance, currencySymbol), Modifier.weight(1f))
+                    }
                     }
                 }
             }
@@ -918,12 +954,16 @@ private fun SectionHeader(title: String, subtitle: String, modifier: Modifier = 
 
 @Composable
 private fun HomePrimaryAction(onClick: () -> Unit) {
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(AccentBlue, AccentPurple),
+                ),
+            )
             .clickable(onClick = onClick),
-        color = AccentBlue,
-        shape = RoundedCornerShape(18.dp),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
