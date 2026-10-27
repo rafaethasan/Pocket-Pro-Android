@@ -10,10 +10,10 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/ic_pocket_launcher"
+        android:icon="@mipmap/ic_pocket_launcher"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
-        android:roundIcon="@drawable/ic_pocket_launcher"
+        android:roundIcon="@mipmap/ic_pocket_launcher"
         android:supportsRtl="true"
         android:usesCleartextTraffic="false"
         android:theme="@style/Theme.PocketProNative">
