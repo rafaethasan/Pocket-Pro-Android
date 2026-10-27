@@ -475,7 +475,7 @@ class PocketNativeRepository(
             response
         } catch (error: Exception) {
             readCache<PocketNativeAccountsResponse>("accounts.json")?.let(::harmonizeAccountsUser)?.takeIf { it.ok && it.payload != null }
-                ?: throw error
+                ?: localLedgerAccounts()
         }
     }
 
@@ -483,6 +483,73 @@ class PocketNativeRepository(
         return readCacheSafe<PocketNativeAccountsResponse>("accounts.json")
             ?.let(::harmonizeAccountsUser)
             ?.takeIf { it.ok && it.payload != null }
+    }
+
+    private fun localLedgerAccounts(): PocketNativeAccountsResponse {
+        val entries = ledgerStore.exportEntries()
+        val currencyCode = preferencesStore.currencyCode()
+        val totalIn = entries.filter { ledgerCashEffect(it) > 0.0 }.sumOf(::ledgerAmount)
+        val totalOut = entries.filter { ledgerCashEffect(it) < 0.0 }.sumOf(::ledgerAmount)
+        val accountCards = entries
+            .groupBy { it.accountId }
+            .map { (accountId, accountEntries) ->
+                val incoming = accountEntries.filter { ledgerCashEffect(it) > 0.0 }.sumOf(::ledgerAmount)
+                val outgoing = accountEntries.filter { ledgerCashEffect(it) < 0.0 }.sumOf(::ledgerAmount)
+                val balance = accountEntries.sumOf(::ledgerCashEffect)
+                PocketNativeAccountCard(
+                    id = accountId,
+                    name = if (accountId > 0) "Offline account #$accountId" else "Offline wallet",
+                    type = "CASH",
+                    typeLabel = "Offline wallet",
+                    currentBalance = balance,
+                    incomeTotal = incoming,
+                    expenseTotal = outgoing,
+                    netChange = balance,
+                    isDefault = accountId == 0,
+                    note = "Stored on this device",
+                    accentHex = "#4D8EFF",
+                    iconToken = "cash",
+                )
+            }
+            .sortedByDescending { it.currentBalance }
+        val recentActivity = entries
+            .sortedWith(compareByDescending<PocketLocalLedgerEntry> { it.entryDate }.thenByDescending { it.createdAtEpochMs })
+            .take(12)
+            .map { entry ->
+                val meta = offlineCategoryMeta(entry.mode, entry.categoryKey)
+                PocketNativeRecentActivity(
+                    id = stableLedgerDisplayId(entry),
+                    kind = ledgerKind(entry.mode),
+                    label = meta.label,
+                    note = entry.note.ifBlank { entry.partyName.ifBlank { modeLabel(entry.mode) } },
+                    date = entry.entryDate,
+                    amount = ledgerAmount(entry),
+                    colorHex = meta.colorHex,
+                )
+            }
+        return PocketNativeAccountsResponse(
+            ok = true,
+            message = "Showing account activity stored on this device.",
+            user = preferredUser(null),
+            payload = PocketNativeAccountsPayload(
+                currencyCode = currencyCode,
+                currencySymbol = offlineCurrencySymbol(currencyCode),
+                activeFilter = "ALL",
+                filters = listOf(
+                    PocketNativeAccountFilter(key = "ALL", label = "All", iconToken = "all"),
+                    PocketNativeAccountFilter(key = "CASH", label = "Cash", iconToken = "cash"),
+                ),
+                summary = PocketNativeAccountsSummary(
+                    totalBalance = accountCards.sumOf { it.currentBalance },
+                    totalIncome = totalIn,
+                    totalExpense = totalOut,
+                    accounts = accountCards.size,
+                    netChange = accountCards.sumOf { it.netChange },
+                ),
+                accounts = accountCards,
+                recentActivity = recentActivity,
+            ),
+        )
     }
 
     suspend fun recurring(): Result<PocketNativeRecurringResponse> = runCatching {
