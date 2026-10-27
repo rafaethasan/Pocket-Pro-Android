@@ -819,7 +819,6 @@ private fun NativeShell(
 
                 NativeFeatureScreen.SmartInsights -> SmartInsightsNativeScreen(
                     repository = repository,
-                    signedInUser = currentSignedInUser,
                     onBack = { featureScreen = null },
                 )
 

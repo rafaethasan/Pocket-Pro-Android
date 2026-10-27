@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.softx.app.data.PocketNativeDashboard
 import com.softx.app.data.PocketNativeRepository
-import com.softx.app.data.PocketNativeUser
 import com.softx.app.ui.theme.AccentBlue
 import com.softx.app.ui.theme.AccentGreen
 import com.softx.app.ui.theme.AccentOrange
@@ -47,19 +46,17 @@ import com.softx.app.ui.theme.SurfaceCard
 import com.softx.app.ui.theme.TextPrimary
 import com.softx.app.ui.theme.TextSecondary
 import kotlin.math.abs
+import java.util.Calendar
 import java.util.Locale
 
 @Composable
 fun SmartInsightsNativeScreen(
     repository: PocketNativeRepository,
-    signedInUser: PocketNativeUser?,
     onBack: () -> Unit,
 ) {
     var loading by remember { mutableStateOf(true) }
     var errorText by remember { mutableStateOf("") }
     var dashboard by remember { mutableStateOf<PocketNativeDashboard?>(null) }
-    val gate = remember(signedInUser) { pocketNativeFeatureGate(signedInUser, "smart_insights") }
-
     LaunchedEffect(Unit) {
         loading = true
         errorText = ""
@@ -111,25 +108,17 @@ fun SmartInsightsNativeScreen(
         item {
             NativeFeatureTopBar(
                 title = "Smart Insights",
-                subtitle = "Read simple money signals from your current Pocket Pro data.",
+                subtitle = "Private, automated guidance from your own Pocket Pro data.",
                 onBack = onBack,
             )
-        }
-        if (!gate.granted) {
-            item {
-                PocketNativePreviewNotice(
-                    title = "Free access",
-                    body = "Smart Insights are available without a subscription.",
-                )
-            }
         }
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                SmartMetricCard("Top Category", topCategory?.label ?: "No data", AccentPurple, Modifier.weight(1f), showProBadge = !gate.granted)
-                SmartMetricCard("Weekly Avg", smartShortMoney(weeklyAverage, currencySymbol), AccentBlue, Modifier.weight(1f), showProBadge = !gate.granted)
+                SmartMetricCard("Top Category", topCategory?.label ?: "No data", AccentPurple, Modifier.weight(1f))
+                SmartMetricCard("Weekly Avg", smartShortMoney(weeklyAverage, currencySymbol), AccentBlue, Modifier.weight(1f))
             }
         }
         item {
@@ -144,7 +133,6 @@ fun SmartInsightsNativeScreen(
         item {
             SmartSectionTitle(
                 title = "Actionable insights",
-                showProBadge = !gate.granted,
             )
         }
         items(insights) { insight ->
@@ -172,6 +160,9 @@ private fun buildSmartInsights(dashboard: PocketNativeDashboard): List<SmartInsi
     val topCategory = dashboard.analytics.categories.maxByOrNull { it.amount }
     val highestWeek = dashboard.analytics.weekly.maxByOrNull { it.amount }
     val monthlyNet = summary.monthIncome - summary.monthExpense
+    val daysLeft = Calendar.getInstance().run {
+        getActualMaximum(Calendar.DAY_OF_MONTH) - get(Calendar.DAY_OF_MONTH) + 1
+    }.coerceAtLeast(1)
 
     val budgetInsight = when {
         summary.budgetUsedPercent >= 90 -> SmartInsightModel(
@@ -237,7 +228,42 @@ private fun buildSmartInsights(dashboard: PocketNativeDashboard): List<SmartInsi
         Icons.Rounded.Lightbulb,
     )
 
-    return listOf(categoryInsight, budgetInsight, cashflowInsight, weeklyInsight)
+    val dailyBudgetInsight = when {
+        summary.budgetAmount <= 0.0 -> SmartInsightModel(
+            "Create a monthly budget",
+            "Set a budget to unlock a simple daily spending guide and earlier warnings before you overspend.",
+            AccentBlue,
+            Icons.Rounded.Lightbulb,
+        )
+        summary.budgetRemaining < 0.0 -> SmartInsightModel(
+            "Budget limit passed",
+            "You are ${smartShortMoney(abs(summary.budgetRemaining), currencySymbol)} over budget. Focus on essentials until your next budget cycle.",
+            AccentPink,
+            Icons.Rounded.WarningAmber,
+        )
+        else -> SmartInsightModel(
+            "Daily spending guide",
+            "You can spend about ${smartShortMoney(summary.budgetRemaining / daysLeft, currencySymbol)} per day for the remaining $daysLeft day${if (daysLeft == 1) "" else "s"} and stay within budget.",
+            AccentBlue,
+            Icons.Rounded.AutoGraph,
+        )
+    }
+
+    val goalInsight = if (summary.goalTarget > 0.0) {
+        val remaining = (summary.goalTarget - summary.goalSaved).coerceAtLeast(0.0)
+        SmartInsightModel(
+            if (remaining == 0.0) "Savings goal reached" else "Savings goal progress",
+            if (remaining == 0.0) {
+                "Great work — your current savings goal is complete. Set a new target to keep the momentum going."
+            } else {
+                "You are ${summary.goalProgressPercent}% of the way there, with ${smartShortMoney(remaining, currencySymbol)} left to reach your goal."
+            },
+            AccentGreen,
+            Icons.Rounded.Savings,
+        )
+    } else null
+
+    return listOfNotNull(categoryInsight, budgetInsight, cashflowInsight, dailyBudgetInsight, goalInsight, weeklyInsight)
 }
 
 @Composable
@@ -280,7 +306,6 @@ private fun SmartMetricCard(
     value: String,
     accent: Color,
     modifier: Modifier = Modifier,
-    showProBadge: Boolean = false,
 ) {
     Column(
         modifier = modifier
@@ -292,9 +317,6 @@ private fun SmartMetricCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(title, color = TextSecondary)
-            if (showProBadge) {
-                PocketNativeProBadge()
-            }
         }
         Text(value, color = accent, fontWeight = FontWeight.Bold, fontSize = 20.sp)
         HorizontalDivider(color = SurfaceCard)
@@ -304,7 +326,6 @@ private fun SmartMetricCard(
 @Composable
 private fun SmartSectionTitle(
     title: String,
-    showProBadge: Boolean = false,
 ) {
     Row(
         modifier = Modifier.padding(vertical = 10.dp),
@@ -312,8 +333,5 @@ private fun SmartSectionTitle(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        if (showProBadge) {
-            PocketNativeProBadge()
-        }
     }
 }
