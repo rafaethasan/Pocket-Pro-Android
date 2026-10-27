@@ -48,7 +48,7 @@ fun PocketBrandBadge(
         modifier = modifier.size(badgeSize),
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_pocket_launcher),
+            painter = painterResource(id = R.mipmap.ic_pocket_launcher),
             contentDescription = "Pocket Pro",
             modifier = Modifier
                 .size(badgeSize)
