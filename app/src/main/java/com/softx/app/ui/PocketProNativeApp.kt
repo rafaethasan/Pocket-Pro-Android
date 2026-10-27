@@ -117,6 +117,7 @@ import com.softx.app.ui.screens.SearchNativeScreen
 import com.softx.app.ui.screens.SettingsNativeScreen
 import com.softx.app.ui.screens.SmartInsightsNativeScreen
 import com.softx.app.ui.screens.LocalPocketPremiumPlansLauncher
+import com.softx.app.ui.theme.AccentPurple
 import com.softx.app.ui.theme.SurfaceBase
 import com.softx.app.ui.theme.SurfaceCard
 import com.softx.app.ui.theme.TextPrimary
@@ -1849,24 +1850,25 @@ private fun PocketFloatingBottomBar(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(bottom = floatingBottomPadding)
-                .height(92.dp),
+                .height(88.dp),
         ) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(70.dp)
-                    .shadow(14.dp, RoundedCornerShape(999.dp), clip = false)
+                    .height(68.dp)
+                    .shadow(18.dp, RoundedCornerShape(999.dp), clip = false)
                     .background(
-                        color = Color.White,
+                        color = Color(0xFF171B27),
                         shape = RoundedCornerShape(999.dp),
-                    ),
+                    )
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(999.dp)),
             )
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(70.dp)
+                    .height(68.dp)
                     .padding(horizontal = 20.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -1881,25 +1883,25 @@ private fun PocketFloatingBottomBar(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .offset(y = (-12).dp)
-                                    .size(78.dp)
+                                .offset(y = (-14).dp)
+                                .size(76.dp)
                                     .background(
-                                        color = Color.White,
+                                    color = Color(0xFF0F1118),
                                         shape = CircleShape,
                                     ),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(68.dp)
-                                        .shadow(20.dp, CircleShape)
+                                        .size(66.dp)
+                                        .shadow(18.dp, CircleShape)
                                         .border(
-                                            width = 4.dp,
-                                            color = Color.White,
+                                            width = 2.dp,
+                                            color = Color(0xFF4F5B78),
                                             shape = CircleShape,
                                         )
                                         .background(
-                                            color = BottomBarAccentBlue,
+                                            color = AccentPurple,
                                             shape = CircleShape,
                                         )
                                         .clickable { onSelect(destination) },
@@ -1920,32 +1922,28 @@ private fun PocketFloatingBottomBar(
                                 .weight(1f)
                                 .fillMaxHeight()
                                 .clickable { onSelect(destination) }
-                                .padding(top = 4.dp, bottom = 5.dp),
+                                        .padding(top = 6.dp, bottom = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(if (selected) 40.dp else 28.dp)
-                                    .background(
-                                        color = if (selected) BottomBarSelectedGlow else Color.Transparent,
-                                        shape = CircleShape,
-                                    ),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = destination.icon,
-                                    contentDescription = destination.label,
-                                    tint = if (selected) BottomBarAccentBlue else BottomBarIconGrey.copy(alpha = 0.98f),
-                                    modifier = Modifier.size(if (selected) 18.dp else 17.dp),
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Icon(
+                                imageVector = destination.icon,
+                                contentDescription = destination.label,
+                                tint = if (selected) AccentPurple else BottomBarIconGrey.copy(alpha = 0.98f),
+                                modifier = Modifier.size(20.dp),
+                            )
+                            Spacer(modifier = Modifier.height(5.dp))
                             Text(
                                 text = destination.label,
-                                color = if (selected) BottomBarAccentBlue else BottomBarIconGrey.copy(alpha = 0.96f),
+                                color = if (selected) Color.White else BottomBarIconGrey.copy(alpha = 0.96f),
                                 fontSize = 10.sp,
                                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 3.dp)
+                                    .size(width = if (selected) 16.dp else 0.dp, height = 2.dp)
+                                    .background(AccentPurple, RoundedCornerShape(99.dp)),
                             )
                         }
                     }
