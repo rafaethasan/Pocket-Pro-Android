@@ -111,6 +111,7 @@ data class PocketNativePreferenceSnapshot(
     val currencyCode: String,
     val hasSeenOnboarding: Boolean,
     val hasCompletedInitialSetup: Boolean,
+    val hasSeenHomeTour: Boolean = false,
     val nightlyReminderEnabled: Boolean = true,
     val nightlyReminderHour: Int = 22,
     val notificationSoundEnabled: Boolean = true,
@@ -215,6 +216,7 @@ class PocketNativePreferencesStore(
     } ?: DEFAULT_LANGUAGE_CODE
 
     fun hasSeenOnboarding(): Boolean = prefs.getBoolean(KEY_ONBOARDING_SEEN, false)
+    fun hasSeenHomeTour(): Boolean = prefs.getBoolean(KEY_HOME_TOUR_SEEN, false)
     fun hasCompletedInitialSetup(): Boolean = prefs.getBoolean(KEY_INITIAL_SETUP_DONE, false)
 
     fun currencyCode(): String = prefs.getString(KEY_CURRENCY_CODE, DEFAULT_CURRENCY_CODE)?.ifBlank {
@@ -284,6 +286,10 @@ class PocketNativePreferencesStore(
 
     fun setHasSeenOnboarding(seen: Boolean) {
         prefs.edit().putBoolean(KEY_ONBOARDING_SEEN, seen).apply()
+    }
+
+    fun setHasSeenHomeTour(seen: Boolean) {
+        prefs.edit().putBoolean(KEY_HOME_TOUR_SEEN, seen).apply()
     }
 
     fun setHasCompletedInitialSetup(done: Boolean) {
@@ -927,6 +933,7 @@ class PocketNativePreferencesStore(
         currencyCode = currencyCode(),
         hasSeenOnboarding = hasSeenOnboarding(),
         hasCompletedInitialSetup = hasCompletedInitialSetup(),
+        hasSeenHomeTour = hasSeenHomeTour(),
         nightlyReminderEnabled = nightlyReminderEnabled(),
         nightlyReminderHour = nightlyReminderHour(),
         notificationSoundEnabled = notificationSoundEnabled(),
@@ -942,6 +949,7 @@ class PocketNativePreferencesStore(
     fun importSnapshot(snapshot: PocketNativePreferenceSnapshot) {
         setHasSeenOnboarding(snapshot.hasSeenOnboarding)
         setHasCompletedInitialSetup(snapshot.hasCompletedInitialSetup)
+        setHasSeenHomeTour(snapshot.hasSeenHomeTour)
         setLanguageCode(snapshot.languageCode)
         setCurrencyCode(snapshot.currencyCode)
         setNightlyReminderEnabled(snapshot.nightlyReminderEnabled)
@@ -973,6 +981,7 @@ class PocketNativePreferencesStore(
         private const val KEY_LANGUAGE_CODE = "language_code"
         private const val KEY_CURRENCY_CODE = "currency_code"
         private const val KEY_ONBOARDING_SEEN = "onboarding_seen"
+        private const val KEY_HOME_TOUR_SEEN = "home_tour_seen"
         private const val KEY_INITIAL_SETUP_DONE = "initial_setup_done"
         private const val KEY_MONTHLY_REMINDERS = "monthly_reminders"
         private const val KEY_LOAN_DUE_REMINDERS = "loan_due_reminders"

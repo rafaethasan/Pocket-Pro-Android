@@ -37,6 +37,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SouthEast
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -250,11 +251,7 @@ fun PocketProNativeApp() {
                 RootScreen.InitialSetup
             }
         } else {
-            rootScreen = if (hasSeenOnboarding) {
-                RootScreen.GetStarted
-            } else {
-                RootScreen.Onboarding
-            }
+            rootScreen = RootScreen.GetStarted
         }
     }
 
@@ -397,6 +394,8 @@ private fun NativeShell(
     var editUrl by rememberSaveable { mutableStateOf("") }
     var editingRecord by remember { mutableStateOf<PocketNativeRecordItem?>(null) }
     var appUnlocked by rememberSaveable { mutableStateOf(!preferencesStore.appLockEnabled()) }
+    var showHomeTour by rememberSaveable { mutableStateOf(false) }
+    var homeTourStep by rememberSaveable { mutableStateOf(0) }
     var unlockPin by remember { mutableStateOf("") }
     var unlockError by remember { mutableStateOf("") }
     var budgetJumpType by rememberSaveable { mutableStateOf("") }
@@ -482,6 +481,20 @@ private fun NativeShell(
         appUnlocked = !preferencesStore.appLockEnabled()
         unlockPin = ""
         unlockError = ""
+    }
+
+    LaunchedEffect(activeTab, featureScreen) {
+        if (activeTab == BottomDestination.Home && featureScreen == null && !preferencesStore.hasSeenHomeTour()) {
+            delay(900)
+            if (activeTab == BottomDestination.Home && featureScreen == null) {
+                showHomeTour = true
+            }
+        }
+    }
+
+    fun closeHomeTour() {
+        preferencesStore.setHasSeenHomeTour(true)
+        showHomeTour = false
     }
 
     fun openSettlementFromReminder(mode: String, reminder: PocketNativeLoanDueReminder, fromQuickAdd: Boolean = false) {
@@ -657,9 +670,10 @@ private fun NativeShell(
     }
 
     BackHandler(
-        enabled = showNotificationsOverlay || showSearchOverlay || showPendingLoanPicker || showAddChooser || featureScreen != null || activeTab != BottomDestination.Home,
+        enabled = showHomeTour || showNotificationsOverlay || showSearchOverlay || showPendingLoanPicker || showAddChooser || featureScreen != null || activeTab != BottomDestination.Home,
     ) {
         when {
+            showHomeTour -> closeHomeTour()
             showNotificationsOverlay -> showNotificationsOverlay = false
             showSearchOverlay -> showSearchOverlay = false
             showPendingLoanPicker -> closePendingLoanPicker()
@@ -675,6 +689,7 @@ private fun NativeShell(
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -1287,6 +1302,145 @@ private fun NativeShell(
                     )
                 }
 
+            }
+        }
+    }
+
+    if (showHomeTour && activeTab == BottomDestination.Home && featureScreen == null) {
+        HomeFeatureTourOverlay(
+            step = homeTourStep,
+            onNext = {
+                if (homeTourStep == 3) {
+                    closeHomeTour()
+                } else {
+                    homeTourStep += 1
+                }
+            },
+            onSkip = { closeHomeTour() },
+        )
+    }
+    }
+}
+
+@Composable
+private fun HomeFeatureTourOverlay(
+    step: Int,
+    onNext: () -> Unit,
+    onSkip: () -> Unit,
+) {
+    val items = listOf(
+        Triple("Your balance", "This card shows the money currently available. Tap the eye icon there when you need privacy.", "Balance card"),
+        Triple("Add a record", "Use the centre + button to add income, expense, give loan, get back, take loan, or pay back.", "+ Add button"),
+        Triple("Check your history", "Records keeps every entry in date order, while Reports helps you understand spending and progress.", "Records & Reports"),
+        Triple("Control your app", "More contains settings, backup and restore, reminders, app lock, and the full user guide.", "More menu"),
+    )
+    val item = items[step.coerceIn(0, items.lastIndex)]
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xB80A1020)),
+    ) {
+        when (step) {
+            0 -> Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 112.dp, start = 22.dp, end = 22.dp)
+                    .fillMaxWidth()
+                    .height(176.dp)
+                    .border(2.dp, Color.White, RoundedCornerShape(28.dp)),
+            )
+            1 -> Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 68.dp)
+                    .size(94.dp)
+                    .border(3.dp, Color.White, CircleShape),
+            )
+            2 -> Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 20.dp, bottom = 58.dp)
+                    .width(176.dp)
+                    .height(82.dp)
+                    .border(2.dp, Color.White, RoundedCornerShape(26.dp)),
+            )
+            else -> Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 20.dp, bottom = 58.dp)
+                    .width(116.dp)
+                    .height(82.dp)
+                    .border(2.dp, Color.White, RoundedCornerShape(26.dp)),
+            )
+        }
+
+        androidx.compose.material3.Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(start = 18.dp, end = 18.dp, bottom = if (step == 0) 136.dp else 230.dp),
+            color = Color(0xFFF8FAFF),
+            shape = RoundedCornerShape(28.dp),
+            shadowElevation = 18.dp,
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(BottomBarAccentBlue.copy(alpha = 0.12f), CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(Icons.Rounded.Search, contentDescription = null, tint = BottomBarAccentBlue, modifier = Modifier.size(18.dp))
+                        }
+                        Text("Home guide • ${step + 1} of ${items.size}", color = TextSecondary, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                    }
+                    TextButton(onClick = onSkip) { Text("Skip", color = BottomBarAccentBlue, fontWeight = FontWeight.Bold) }
+                }
+                Text(item.first, color = TextPrimary, fontSize = 23.sp, fontWeight = FontWeight.Black)
+                Text(item.second, color = TextSecondary, fontSize = 14.sp, lineHeight = 20.sp)
+                Text("Highlighted: ${item.third}", color = BottomBarAccentBlue, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        repeat(items.size) { index ->
+                            Box(
+                                modifier = Modifier
+                                    .size(if (index == step) 22.dp else 8.dp, 8.dp)
+                                    .background(if (index == step) BottomBarAccentBlue else TextSecondary.copy(alpha = 0.22f), RoundedCornerShape(20.dp)),
+                            )
+                        }
+                    }
+                    androidx.compose.material3.Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable(onClick = onNext),
+                        color = BottomBarAccentBlue,
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Text(
+                            text = if (step == items.lastIndex) "Got it" else "Next",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                        )
+                    }
+                }
             }
         }
     }
