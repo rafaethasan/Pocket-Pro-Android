@@ -1046,38 +1046,35 @@ private fun HeaderActionButton(
     onClick: () -> Unit,
     badgeCount: Int = 0,
 ) {
-    Surface(
+    Box(
         modifier = Modifier
             .size(54.dp)
             .clickable(onClick = onClick),
-        color = SurfaceCard,
-        shape = RoundedCornerShape(18.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            PocketSvgIcon(
-                assetName = assetName,
-                fallback = icon,
-                contentDescription = contentDescription,
-                tint = TextPrimary,
-                modifier = Modifier.size(22.dp),
-            )
-            if (badgeCount > 0) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 8.dp, end = 8.dp)
-                        .size(18.dp)
-                        .clip(CircleShape)
-                        .background(AccentPink),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = badgeCount.coerceAtMost(9).toString(),
-                        color = Color.White,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+        PocketSvgIcon(
+            assetName = assetName,
+            fallback = icon,
+            contentDescription = contentDescription,
+            tint = TextPrimary,
+            modifier = Modifier.size(25.dp),
+        )
+        if (badgeCount > 0) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 5.dp, end = 5.dp)
+                    .size(16.dp)
+                    .clip(CircleShape)
+                    .background(AccentPink),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = badgeCount.coerceAtMost(9).toString(),
+                    color = Color.White,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                )
             }
         }
     }
@@ -1190,21 +1187,13 @@ private fun ActionTile(item: HomeQuickActionItem, modifier: Modifier = Modifier)
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(58.dp)
-                .clip(CircleShape)
-                .background(item.accent.copy(alpha = 0.12f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            PocketSvgIcon(
-                assetName = item.assetName,
-                fallback = item.icon,
-                contentDescription = item.title,
-                tint = item.accent,
-                modifier = Modifier.size(30.dp),
-            )
-        }
+        PocketSvgIcon(
+            assetName = item.assetName,
+            fallback = item.icon,
+            contentDescription = item.title,
+            tint = item.accent,
+            modifier = Modifier.size(38.dp),
+        )
         Text(
             item.title,
             color = TextPrimary,

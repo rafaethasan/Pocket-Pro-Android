@@ -697,11 +697,7 @@ private fun NativeShell(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color(0xFFF9FBFF), SurfaceBase, Color(0xFFEDF3FF)),
-                        ),
-                    )
+                    .background(SurfaceBase)
                     .padding(
                         start = innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
                         top = innerPadding.calculateTopPadding(),
