@@ -1843,6 +1843,7 @@ private fun PocketFloatingBottomBar(
     val destinations = BottomDestination.entries
     val navigationBottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val floatingBottomPadding = max(navigationBottomInset.value + 22f, 28f).dp
+    val barShape = RoundedCornerShape(36.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -1861,12 +1862,15 @@ private fun PocketFloatingBottomBar(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .height(68.dp)
-                    .shadow(18.dp, RoundedCornerShape(999.dp), clip = false)
+                    .shadow(20.dp, barShape, clip = false)
+                    .clip(barShape)
                     .background(
-                        color = Color(0xFF171B27),
-                        shape = RoundedCornerShape(999.dp),
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(Color(0xFF1C2230), Color(0xFF151A26)),
+                        ),
+                        shape = barShape,
                     )
-                    .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(999.dp)),
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), barShape),
             )
             Row(
                 modifier = Modifier
@@ -1887,10 +1891,16 @@ private fun PocketFloatingBottomBar(
                         ) {
                             Box(
                                 modifier = Modifier
-                                .offset(y = (-14).dp)
-                                .size(76.dp)
+                                    .offset(y = (-16).dp)
+                                    .size(78.dp)
+                                    .clip(CircleShape)
                                     .background(
-                                    color = Color(0xFF0F1118),
+                                        color = Color(0xFF0F1118),
+                                        shape = CircleShape,
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.White.copy(alpha = 0.08f),
                                         shape = CircleShape,
                                     ),
                                 contentAlignment = Alignment.Center,
@@ -1898,10 +1908,11 @@ private fun PocketFloatingBottomBar(
                                 Box(
                                     modifier = Modifier
                                         .size(66.dp)
-                                        .shadow(18.dp, CircleShape)
+                                        .clip(CircleShape)
+                                        .shadow(20.dp, CircleShape, clip = false)
                                         .border(
                                             width = 2.dp,
-                                            color = Color(0xFF4F5B78),
+                                            color = Color(0xFF8E78FF),
                                             shape = CircleShape,
                                         )
                                         .background(
@@ -1925,8 +1936,10 @@ private fun PocketFloatingBottomBar(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(if (selected) AccentPurple.copy(alpha = 0.12f) else Color.Transparent)
                                 .clickable { onSelect(destination) }
-                                        .padding(top = 6.dp, bottom = 4.dp),
+                                .padding(top = 6.dp, bottom = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
