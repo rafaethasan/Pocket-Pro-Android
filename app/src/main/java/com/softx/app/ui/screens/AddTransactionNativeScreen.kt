@@ -34,12 +34,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AttachMoney
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.Checkroom
 import androidx.compose.material.icons.rounded.CreditCard
-import androidx.compose.material.icons.rounded.AddCircleOutline
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -1656,16 +1654,12 @@ private fun NativeCategoryGridField(
                                 onClick = { onOpenCategoryManager(modeKind) },
                                 modifier = Modifier.weight(1f),
                             ) {
-                                Icon(Icons.Rounded.AddCircleOutline, contentDescription = null, tint = AccentBlue)
-                                Spacer(modifier = Modifier.width(6.dp))
                                 Text("New Category", color = AccentBlue, fontWeight = FontWeight.SemiBold)
                             }
                             TextButton(
                                 onClick = { onOpenCategoryManager(modeKind) },
                                 modifier = Modifier.weight(1f),
                             ) {
-                                Icon(Icons.Rounded.Edit, contentDescription = null, tint = AccentPink)
-                                Spacer(modifier = Modifier.width(6.dp))
                                 Text("Edit", color = AccentPink, fontWeight = FontWeight.SemiBold)
                             }
                         }
