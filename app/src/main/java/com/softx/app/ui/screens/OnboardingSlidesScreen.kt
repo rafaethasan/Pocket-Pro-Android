@@ -17,10 +17,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.Security
-import androidx.compose.material.icons.rounded.Smartphone
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -59,9 +61,9 @@ fun OnboardingSlidesScreen(
     val slides = remember {
         listOf(
             PocketOnboardingSlide(
-                title = "Smart Tracking",
-                subtitle = "Track your daily income and expenses in one tidy place without feeling lost.",
-                icon = Icons.AutoMirrored.Rounded.TrendingUp,
+                title = "Your money, at a glance",
+                subtitle = "Home shows your available balance first. Tap the eye icon whenever you want to hide or reveal it.",
+                icon = Icons.Rounded.AccountBalanceWallet,
                 iconStart = Color(0xFF3283FF),
                 iconEnd = Color(0xFF11B3D9),
                 glowColor = Color(0xFF0D89D0),
@@ -69,9 +71,9 @@ fun OnboardingSlidesScreen(
                 buttonEnd = Color(0xFF11B3D9),
             ),
             PocketOnboardingSlide(
-                title = "Detailed Reports",
-                subtitle = "See where your money goes, follow your budget, and stay aware of your progress.",
-                icon = Icons.Rounded.BarChart,
+                title = "Add a record in seconds",
+                subtitle = "Use the + button for income, expense, loan given, loan taken, payback, or money received.",
+                icon = Icons.Rounded.AddCircle,
                 iconStart = Color(0xFFB03CFF),
                 iconEnd = Color(0xFFF33892),
                 glowColor = Color(0xFF7B379C),
@@ -79,9 +81,9 @@ fun OnboardingSlidesScreen(
                 buttonEnd = Color(0xFFF33892),
             ),
             PocketOnboardingSlide(
-                title = "Secure and Reliable",
-                subtitle = "Keep your records protected with a stable account flow and secure daily access.",
-                icon = Icons.Rounded.Security,
+                title = "Keep loans clear",
+                subtitle = "Choose the right loan action, add the person and amount, then track every payment until it is settled.",
+                icon = Icons.AutoMirrored.Rounded.TrendingUp,
                 iconStart = Color(0xFF0DBF9E),
                 iconEnd = Color(0xFF13D7B0),
                 glowColor = Color(0xFF0C7A6A),
@@ -89,9 +91,9 @@ fun OnboardingSlidesScreen(
                 buttonEnd = Color(0xFF13D7B0),
             ),
             PocketOnboardingSlide(
-                title = "Use It Anywhere",
-                subtitle = "Open Pocket Pro from your phone and keep your finances close wherever life takes you.",
-                icon = Icons.Rounded.Smartphone,
+                title = "Review and stay protected",
+                subtitle = "Records keeps your full history. Reports shows progress, and Backup & Restore keeps a copy of your data.",
+                icon = Icons.Rounded.BarChart,
                 iconStart = Color(0xFFFF7B19),
                 iconEnd = Color(0xFFFF3648),
                 glowColor = Color(0xFF8D3B2F),
@@ -126,14 +128,30 @@ fun OnboardingSlidesScreen(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                Text(
+                    text = "Quick tour • ${page + 1} of ${slides.size}",
+                    color = TextSecondary.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = onSkip) {
                     Text(
                         text = "Skip",
                         color = TextSecondary,
                         fontWeight = FontWeight.SemiBold,
                     )
+                }
+                    IconButton(onClick = onSkip) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Close quick tour",
+                            tint = TextSecondary,
+                        )
+                    }
                 }
             }
 
@@ -221,7 +239,7 @@ fun OnboardingSlidesScreen(
                 }
 
                 GradientActionButton(
-                    text = if (page == slides.lastIndex) "Start Now" else "Next",
+                    text = if (page == slides.lastIndex) "Open Pocket Pro" else "Next",
                     onClick = {
                         if (page == slides.lastIndex) {
                             onComplete()

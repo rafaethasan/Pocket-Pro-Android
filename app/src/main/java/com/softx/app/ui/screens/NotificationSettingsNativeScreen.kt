@@ -1,5 +1,9 @@
 package com.softx.app.ui.screens
 
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -20,6 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.softx.app.PocketReminderScheduler
 import com.softx.app.data.PocketNativePreferencesStore
 import com.softx.app.ui.theme.AccentGreen
@@ -65,6 +71,7 @@ fun NotificationSettingsNativeScreen(
                     reminderEnabled = next
                     preferencesStore.setNightlyReminderEnabled(next)
                     if (next) {
+                        requestNotificationPermissionIfNeeded(context)
                         PocketReminderScheduler.ensureDailyReminder(context)
                     } else {
                         PocketReminderScheduler.cancelDailyReminder(context)
@@ -109,6 +116,16 @@ fun NotificationSettingsNativeScreen(
                 "Lead-time alerts stay active for monthly reminders, installments, and loan follow-ups: 10 days, 5 days, 3 days, 1 day, and same day.",
             )
         }
+    }
+}
+
+private fun requestNotificationPermissionIfNeeded(context: android.content.Context) {
+    val activity = context as? Activity ?: return
+    if (
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+    ) {
+        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 2202)
     }
 }
 @Composable
