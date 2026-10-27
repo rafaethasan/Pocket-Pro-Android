@@ -1855,7 +1855,9 @@ private fun PocketFloatingBottomBar(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(bottom = floatingBottomPadding)
-                .height(88.dp),
+                // Leave real space above and below the raised add button.
+                // This prevents its circular rim being clipped by Scaffold.
+                .height(104.dp),
         ) {
             Box(
                 modifier = Modifier
@@ -1891,8 +1893,8 @@ private fun PocketFloatingBottomBar(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .offset(y = (-16).dp)
-                                    .size(78.dp)
+                                    .offset(y = (-18).dp)
+                                    .size(84.dp)
                                     .clip(CircleShape)
                                     .background(
                                         color = Color(0xFF0F1118),
@@ -1907,7 +1909,7 @@ private fun PocketFloatingBottomBar(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(66.dp)
+                                        .size(70.dp)
                                         .clip(CircleShape)
                                         .shadow(20.dp, CircleShape, clip = false)
                                         .border(
