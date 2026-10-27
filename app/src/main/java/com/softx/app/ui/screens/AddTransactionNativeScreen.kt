@@ -98,6 +98,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -180,9 +181,11 @@ fun AddTransactionNativeScreen(
     initialPendingDueDate: String = "",
     initialPrefillPartyName: String = "",
     initialPrefillNote: String = "",
+    restoredAmountText: String = "",
     showModeTabs: Boolean = true,
     onClose: () -> Unit = {},
     onOpenCategoryManager: (String) -> Unit = {},
+    onAmountChanged: (String) -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
     val context = LocalContext.current
@@ -195,7 +198,7 @@ fun AddTransactionNativeScreen(
     var showSuccessDialog by remember { mutableStateOf(false) }
     var formPayload by remember { mutableStateOf<PocketNativeTransactionFormPayload?>(null) }
     var entryDate by remember { mutableStateOf("") }
-    var amountText by remember { mutableStateOf("") }
+    var amountText by remember { mutableStateOf(restoredAmountText) }
     var partyName by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var dueDate by remember { mutableStateOf("") }
@@ -306,7 +309,9 @@ fun AddTransactionNativeScreen(
             else -> ""
         }
         entryDate = resolvedDate
-        amountText = if (resolvedAmount > 0.0) {
+        amountText = if (restoredAmountText.isNotBlank()) {
+            restoredAmountText
+        } else if (resolvedAmount > 0.0) {
             ("%.2f".format(resolvedAmount)).trimEnd('0').trimEnd('.')
         } else ""
         amountPadOpen = !localEditMode
@@ -359,6 +364,10 @@ fun AddTransactionNativeScreen(
         } else {
             errorText = result.exceptionOrNull()?.message ?: "Pocket Pro transaction form could not be loaded."
         }
+    }
+
+    LaunchedEffect(amountText) {
+        onAmountChanged(amountText)
     }
 
     if (loading) {
@@ -1658,7 +1667,7 @@ private fun NativeCategoryGridField(
                     }
                     item {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            items.chunked(4).forEach { rowItems ->
+                            items.chunked(3).forEach { rowItems ->
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1675,7 +1684,7 @@ private fun NativeCategoryGridField(
                                             )
                                         }
                                     }
-                                    repeat(4 - rowItems.size) {
+                                    repeat(3 - rowItems.size) {
                                         Spacer(modifier = Modifier.weight(1f))
                                     }
                                 }
@@ -1699,27 +1708,41 @@ private fun NativeCategoryChip(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (selected) AccentPurple.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.035f))
+            .border(
+                width = 1.dp,
+                color = if (selected) AccentPurple.copy(alpha = 0.75f) else Color.White.copy(alpha = 0.06f),
+                shape = RoundedCornerShape(16.dp),
+            )
             .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
+            .padding(horizontal = 6.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
-        Text(
-            text = item.label,
-            color = TextPrimary,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            fontSize = 11.sp,
-            maxLines = 2,
-        )
         Box(
             modifier = Modifier
-                .padding(top = 2.dp)
-                .width(22.dp)
-                .height(2.dp)
+                .size(34.dp)
                 .background(
-                    if (selected) AccentPurple.copy(alpha = 0.95f) else Color.Transparent,
-                    RoundedCornerShape(99.dp),
+                    if (selected) AccentPurple.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.06f),
+                    CircleShape,
                 ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = pocketCategoryVisualIcon(item.key),
+                contentDescription = null,
+                tint = if (selected) AccentPurple else TextSecondary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        Text(
+            text = item.label,
+            color = if (selected) TextPrimary else TextSecondary,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

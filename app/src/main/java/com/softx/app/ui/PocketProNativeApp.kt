@@ -192,8 +192,8 @@ private fun normalizeRecordEditKind(record: PocketNativeRecordItem): String {
 }
 
 private val BottomBarPureBlack = Color.White
-private val BottomBarSurface = Color(0xFFFFFFFF)
-private val BottomBarSurfaceSoft = Color(0xFFF0F4FF)
+private val BottomBarSurface = Color(0xFF121722)
+private val BottomBarSurfaceSoft = Color(0xFF1A2130)
 private val BottomBarStroke = Color(0xFFDCE5F5)
 private val BottomBarIconGrey = Color(0xFF8A98B2)
 private val BottomBarAccentOrange = Color(0xFFF09A3E)
@@ -385,6 +385,7 @@ private fun NativeShell(
     var addPendingDueDate by rememberSaveable { mutableStateOf("") }
     var addPrefillPartyName by rememberSaveable { mutableStateOf("") }
     var addPrefillNote by rememberSaveable { mutableStateOf("") }
+    var addDraftAmount by rememberSaveable { mutableStateOf("") }
     var addSessionKey by rememberSaveable { mutableStateOf(0) }
     var pendingLoanPickerMode by rememberSaveable { mutableStateOf("") }
     var pendingLoanPickerTitle by rememberSaveable { mutableStateOf("") }
@@ -631,6 +632,7 @@ private fun NativeShell(
         addPendingDueDate = ""
         addPrefillPartyName = ""
         addPrefillNote = ""
+        addDraftAmount = ""
         editingRecord = null
     }
 
@@ -987,6 +989,8 @@ private fun NativeShell(
                             initialPendingDueDate = addPendingDueDate,
                             initialPrefillPartyName = addPrefillPartyName,
                             initialPrefillNote = addPrefillNote,
+                            restoredAmountText = addDraftAmount,
+                            onAmountChanged = { addDraftAmount = it },
                             showModeTabs = false,
                             onClose = { closeAddFlow() },
                             onOpenCategoryManager = { kind ->
@@ -1141,7 +1145,8 @@ private fun NativeShell(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(24.dp))
-                                .background(SurfaceBase)
+                                .background(BottomBarSurface)
+                                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
                                 .padding(horizontal = 20.dp, vertical = 18.dp),
                         ) {
                             Column(
