@@ -26,10 +26,11 @@ data class PocketNativeBackupStats(
 )
 
 data class PocketNativeBackupSnapshot(
-    val version: Int = 1,
+    val version: Int = 2,
     val exportedAt: String,
     val preferences: PocketNativePreferenceSnapshot,
     val cacheFiles: Map<String, String>,
+    val ledgerEntries: List<PocketLocalLedgerEntry> = emptyList(),
 )
 
 class PocketNativeRepository(
@@ -38,6 +39,7 @@ class PocketNativeRepository(
 ) {
     private val gson = Gson()
     private val preferencesStore by lazy { PocketNativePreferencesStore(context) }
+    private val ledgerStore by lazy { PocketLedgerStore(context) }
     private val cacheDir: File by lazy {
         File(context.filesDir, "pocket-cache").apply { mkdirs() }
     }
@@ -876,6 +878,7 @@ class PocketNativeRepository(
                         else -> response.message
                     },
                 ).also {
+                    ledgerStore.record(request, syncState = "synced")
                     applyOfflineTransactionToCaches(request)
                     preferencesStore.markMoneyEntryLogged()
                 }
@@ -898,6 +901,7 @@ class PocketNativeRepository(
                         dueDate = request.dueDate,
                     )
                 )
+                ledgerStore.record(request, syncState = "pending")
                 applyOfflineTransactionToCaches(request)
                 PocketNativeTransactionSaveResponse(
                     ok = true,
@@ -2256,6 +2260,8 @@ class PocketNativeRepository(
                 )
                 if (!response.ok) {
                     remaining.add(item)
+                } else {
+                    ledgerStore.markSynced(item.clientTransactionId)
                 }
             } catch (_: Exception) {
                 remaining.add(item)
@@ -2425,6 +2431,7 @@ class PocketNativeRepository(
             exportedAt = OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             preferences = preferencesStore.exportSnapshot(),
             cacheFiles = cacheSnapshot,
+            ledgerEntries = ledgerStore.exportEntries(),
         )
         gson.toJson(backup)
     }
@@ -2443,6 +2450,7 @@ class PocketNativeRepository(
                 File(cacheDir, name).writeText(content)
             }
         }
+        ledgerStore.restoreEntries(snapshot.ledgerEntries)
         preferencesStore.importSnapshot(snapshot.preferences)
         "Backup restored."
     }
