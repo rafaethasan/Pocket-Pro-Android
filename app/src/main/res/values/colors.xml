@@ -1,4 +1,5 @@
 <resources>
     <color name="pocket_dark_bg">#0F1118</color>
     <color name="pocket_splash_bg">#090C14</color>
+    <color name="pocket_launcher_background">#F8FAFF</color>
 </resources>
