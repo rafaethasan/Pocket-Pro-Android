@@ -284,16 +284,18 @@ fun HomeNativeScreen(
                 }
             }
         }
-        item {
-            DueThisMonthStrip(
-                installmentCount = thisMonthInstallments.size,
-                installmentTotal = formatCurrency(thisMonthInstallmentTotal, currencySymbol),
-                loanCount = thisMonthLoanReminders.size,
-                loanTotal = formatCurrency(thisMonthLoanTotal, currencySymbol),
-                monthlyCount = thisMonthMonthlyReminders.size,
-                nextDueLabel = nextDueLabel,
-                onClick = onOpenBudget,
-            )
+        if (thisMonthInstallments.isNotEmpty() || thisMonthLoanReminders.isNotEmpty() || thisMonthMonthlyReminders.isNotEmpty()) {
+            item {
+                DueThisMonthStrip(
+                    installmentCount = thisMonthInstallments.size,
+                    installmentTotal = formatCurrency(thisMonthInstallmentTotal, currencySymbol),
+                    loanCount = thisMonthLoanReminders.size,
+                    loanTotal = formatCurrency(thisMonthLoanTotal, currencySymbol),
+                    monthlyCount = thisMonthMonthlyReminders.size,
+                    nextDueLabel = nextDueLabel,
+                    onClick = onOpenBudget,
+                )
+            }
         }
         item {
             TodayStrip(
@@ -1112,8 +1114,6 @@ private fun TodayStrip(income: String, expense: String, net: String, netAccent: 
 private fun TodayValuePill(title: String, value: String, accent: Color, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceCard.copy(alpha = 0.38f))
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
@@ -1182,41 +1182,37 @@ private fun QuickActionRow(items: List<HomeQuickActionItem>) {
 
 @Composable
 private fun ActionTile(item: HomeQuickActionItem, modifier: Modifier = Modifier) {
-    Card(
-        onClick = item.onClick,
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = SurfaceCard.copy(alpha = 0.42f)),
-        shape = RoundedCornerShape(22.dp),
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .clickable(onClick = item.onClick)
+            .padding(vertical = 12.dp, horizontal = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(vertical = 14.dp, horizontal = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        Box(
+            modifier = Modifier
+                .size(58.dp)
+                .clip(CircleShape)
+                .background(item.accent.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(58.dp)
-                    .clip(CircleShape)
-                    .background(item.accent.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                PocketSvgIcon(
-                    assetName = item.assetName,
-                    fallback = item.icon,
-                    contentDescription = item.title,
-                    tint = item.accent,
-                    modifier = Modifier.size(30.dp),
-                )
-            }
-            Text(
-                item.title,
-                color = TextPrimary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            PocketSvgIcon(
+                assetName = item.assetName,
+                fallback = item.icon,
+                contentDescription = item.title,
+                tint = item.accent,
+                modifier = Modifier.size(30.dp),
             )
         }
+        Text(
+            item.title,
+            color = TextPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
