@@ -742,6 +742,11 @@ fun AddTransactionNativeScreen(
                         errorText = "Please choose account and category."
                         return@Button
                     }
+                    if (selectedMode in setOf("lent", "borrow", "receive", "repay") && partyName.trim().isBlank()) {
+                        successText = ""
+                        errorText = "Add the person's name so this loan stays traceable."
+                        return@Button
+                    }
                     scope.launch {
                         saving = true
                         successText = ""
@@ -758,6 +763,7 @@ fun AddTransactionNativeScreen(
                             editKind = editKind,
                             editId = editId,
                             editUrl = editUrl,
+                            dueDate = dueDate,
                         )
                         saving = false
                         if (result.isSuccess) {

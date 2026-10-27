@@ -11,6 +11,9 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
+import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlin.math.abs
 import retrofit2.HttpException
 
@@ -50,6 +53,8 @@ class PocketNativeRepository(
         val note: String,
         val editKind: String = "",
         val editId: Int = 0,
+        val clientTransactionId: String = "",
+        val dueDate: String = "",
     )
 
     private data class QueuedBudgetSave(
@@ -785,12 +790,16 @@ class PocketNativeRepository(
         editKind: String = "",
         editId: Int = 0,
         editUrl: String = "",
+        dueDate: String = "",
     ): Result<PocketNativeTransactionSaveResponse> = runCatching {
         val normalizedMode = mode.trim()
+        val normalizedAmount = BigDecimal.valueOf(amount)
+            .setScale(2, RoundingMode.HALF_UP)
+            .toDouble()
         val request = PocketNativeTransactionSaveRequest(
             mode = normalizedMode,
             entryDate = entryDate,
-            amount = amount,
+            amount = normalizedAmount,
             accountId = accountId,
             categoryKey = backendCategoryFor(normalizedMode, categoryKey),
             paymentMethod = paymentMethod,
@@ -798,6 +807,8 @@ class PocketNativeRepository(
             note = note.trim(),
             editKind = normalizeEditKindForSave(editKind, normalizedMode),
             editId = editId,
+            clientTransactionId = UUID.randomUUID().toString(),
+            dueDate = dueDate.trim(),
         )
         try {
             val displayMode = request.mode.trim().lowercase()
@@ -883,6 +894,8 @@ class PocketNativeRepository(
                         note = request.note,
                         editKind = request.editKind,
                         editId = request.editId,
+                        clientTransactionId = request.clientTransactionId,
+                        dueDate = request.dueDate,
                     )
                 )
                 applyOfflineTransactionToCaches(request)
@@ -2237,6 +2250,8 @@ class PocketNativeRepository(
                         note = item.note,
                         editKind = item.editKind,
                         editId = item.editId,
+                        clientTransactionId = item.clientTransactionId,
+                        dueDate = item.dueDate,
                     ),
                 )
                 if (!response.ok) {

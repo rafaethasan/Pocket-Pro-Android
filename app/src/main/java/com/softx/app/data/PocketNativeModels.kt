@@ -488,6 +488,9 @@ data class PocketNativeTransactionSaveRequest(
     val note: String,
     val editKind: String = "",
     val editId: Int = 0,
+    /** Stable per-entry key for idempotent retries after a network timeout. */
+    val clientTransactionId: String = "",
+    val dueDate: String = "",
 )
 
 data class PocketNativeTransactionSaveResponse(
