@@ -1,19 +1,18 @@
 package com.softx.app.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
-private val PocketLightColors = lightColorScheme(
-    primary = AccentBlue,
+private val PocketDarkColors = darkColorScheme(
+    primary = AccentPurple,
     secondary = AccentBlue,
-    tertiary = AccentPurple,
+    tertiary = AccentPink,
     background = SurfaceBase,
     surface = SurfaceCard,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
+    onPrimary = TextPrimary,
+    onSecondary = TextPrimary,
+    onTertiary = TextPrimary,
     onBackground = TextPrimary,
     onSurface = TextPrimary,
 )
@@ -21,7 +20,7 @@ private val PocketLightColors = lightColorScheme(
 @Composable
 fun PocketProNativeTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = PocketLightColors,
+        colorScheme = PocketDarkColors,
         typography = PocketTypography,
         content = content,
     )
