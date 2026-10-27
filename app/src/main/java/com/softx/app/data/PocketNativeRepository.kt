@@ -272,7 +272,7 @@ class PocketNativeRepository(
             response
         } catch (error: Exception) {
             readCache<PocketNativeDashboardResponse>("dashboard.json")?.let(::harmonizeDashboardUser)?.takeIf { it.ok && it.dashboard != null }
-                ?: throw error
+                ?: localLedgerDashboard()
         }
     }
 
@@ -293,7 +293,7 @@ class PocketNativeRepository(
             response
         } catch (error: Exception) {
             readCache<PocketNativeRecordsResponse>("records-${monthValue.ifBlank { "current" }}.json")?.takeIf { it.ok && it.payload != null }
-                ?: throw error
+                ?: localLedgerRecords(monthValue)
         }
     }
 
@@ -302,6 +302,167 @@ class PocketNativeRepository(
         return readCacheSafe<PocketNativeRecordsResponse>(cacheName)
             ?.takeIf { it.ok && it.payload != null }
     }
+
+    /**
+     * First-run offline fallback. Cached server data remains preferable when it
+     * exists because it contains the user's pre-migration history; this view
+     * exposes all entries already written into the durable device journal.
+     */
+    private fun localLedgerDashboard(): PocketNativeDashboardResponse {
+        val allEntries = ledgerStore.exportEntries()
+        val currentMonth = LocalDate.now().toString().take(7)
+        val monthEntries = allEntries.filter { it.entryDate.startsWith(currentMonth) }
+        val currencyCode = preferencesStore.currencyCode()
+        val currencySymbol = offlineCurrencySymbol(currencyCode)
+        val totalBalance = allEntries.sumOf(::ledgerCashEffect)
+        val monthIncome = monthEntries.filter { it.mode == "income" }.sumOf(::ledgerAmount)
+        val monthExpense = monthEntries.filter { it.mode == "expense" }.sumOf(::ledgerAmount)
+        val expenseByCategory = monthEntries
+            .filter { it.mode == "expense" }
+            .groupBy { it.categoryKey }
+            .map { (key, entries) ->
+                val amount = entries.sumOf(::ledgerAmount)
+                val meta = offlineCategoryMeta("expense", key)
+                PocketNativeAnalyticsCategory(
+                    key = key,
+                    label = meta.label,
+                    colorHex = meta.colorHex,
+                    amount = amount,
+                    percent = if (monthExpense > 0.0) ((amount / monthExpense) * 100).toInt() else 0,
+                )
+            }
+            .sortedByDescending { it.amount }
+        val recentActivity = allEntries
+            .sortedWith(compareByDescending<PocketLocalLedgerEntry> { it.entryDate }.thenByDescending { it.createdAtEpochMs })
+            .take(8)
+            .map { entry ->
+                val meta = offlineCategoryMeta(entry.mode, entry.categoryKey)
+                PocketNativeRecentActivity(
+                    id = stableLedgerDisplayId(entry),
+                    kind = ledgerKind(entry.mode),
+                    label = meta.label,
+                    note = entry.note.ifBlank { entry.partyName.ifBlank { modeLabel(entry.mode) } },
+                    date = entry.entryDate,
+                    amount = ledgerAmount(entry),
+                    colorHex = meta.colorHex,
+                )
+            }
+        return PocketNativeDashboardResponse(
+            ok = true,
+            message = "Showing entries stored securely on this device.",
+            user = preferredUser(null),
+            dashboard = PocketNativeDashboard(
+                currencyCode = currencyCode,
+                currencySymbol = currencySymbol,
+                summary = PocketNativeSummary(
+                    totalBalance = totalBalance,
+                    monthIncome = monthIncome,
+                    monthExpense = monthExpense,
+                    todayIncome = monthEntries.filter { it.mode == "income" && it.entryDate == LocalDate.now().toString() }.sumOf(::ledgerAmount),
+                    todayExpense = monthEntries.filter { it.mode == "expense" && it.entryDate == LocalDate.now().toString() }.sumOf(::ledgerAmount),
+                    accounts = 1,
+                ),
+                accounts = listOf(
+                    PocketNativeAccount(
+                        id = 0,
+                        name = "Offline wallet",
+                        type = "CASH",
+                        currentBalance = totalBalance,
+                        isDefault = true,
+                    ),
+                ),
+                analytics = PocketNativeAnalytics(categories = expenseByCategory),
+                recentActivity = recentActivity,
+            ),
+        )
+    }
+
+    private fun localLedgerRecords(monthValue: String): PocketNativeRecordsResponse {
+        val normalizedMonth = monthValue.takeIf { it.matches(Regex("\\d{4}-\\d{2}")) }
+            ?: LocalDate.now().toString().take(7)
+        val entries = ledgerStore.entriesForMonth(normalizedMonth)
+        val currencyCode = preferencesStore.currencyCode()
+        val income = entries.filter { it.mode == "income" }.sumOf(::ledgerAmount)
+        val expense = entries.filter { it.mode == "expense" }.sumOf(::ledgerAmount)
+        val lent = entries.filter { it.mode == "lent" }.sumOf(::ledgerAmount)
+        val groups = entries
+            .groupBy { it.entryDate }
+            .toSortedMap(compareByDescending<String> { it })
+            .map { (date, dayEntries) ->
+                PocketNativeRecordGroup(
+                    dateIso = date,
+                    dateLabel = ledgerDateLabel(date),
+                    weekdayLabel = ledgerWeekdayLabel(date),
+                    incomeTotal = dayEntries.filter { it.mode == "income" }.sumOf(::ledgerAmount),
+                    expenseTotal = dayEntries.filter { it.mode == "expense" }.sumOf(::ledgerAmount),
+                    rows = dayEntries
+                        .sortedByDescending { it.createdAtEpochMs }
+                        .map { entry ->
+                            val meta = offlineCategoryMeta(entry.mode, entry.categoryKey)
+                            PocketNativeRecordItem(
+                                id = stableLedgerDisplayId(entry),
+                                kind = ledgerKind(entry.mode),
+                                mode = entry.mode,
+                                label = meta.label,
+                                note = entry.note.ifBlank { entry.partyName.ifBlank { modeLabel(entry.mode) } },
+                                date = entry.entryDate,
+                                amount = ledgerAmount(entry),
+                                signedAmount = ledgerCashEffect(entry),
+                                colorHex = meta.colorHex,
+                                iconClass = meta.iconClass,
+                                canDelete = false,
+                            )
+                        },
+                )
+            }
+        return PocketNativeRecordsResponse(
+            ok = true,
+            message = "Showing records stored on this device.",
+            user = preferredUser(null),
+            payload = PocketNativeRecordsPayload(
+                monthValue = normalizedMonth,
+                monthLabel = ledgerMonthLabel(normalizedMonth),
+                yearLabel = normalizedMonth.take(4),
+                currencyCode = currencyCode,
+                currencySymbol = offlineCurrencySymbol(currencyCode),
+                summary = PocketNativeRecordsSummary(
+                    income = income,
+                    expense = expense,
+                    lent = lent,
+                    balance = entries.sumOf(::ledgerCashEffect),
+                    records = entries.size,
+                ),
+                groups = groups,
+            ),
+        )
+    }
+
+    private fun ledgerAmount(entry: PocketLocalLedgerEntry): Double = entry.amountMinor / 100.0
+
+    private fun ledgerCashEffect(entry: PocketLocalLedgerEntry): Double = when (entry.mode) {
+        "income", "borrow", "receive" -> ledgerAmount(entry)
+        else -> -ledgerAmount(entry)
+    }
+
+    private fun ledgerKind(mode: String): String = when (mode) {
+        "income", "borrow", "receive" -> "income"
+        else -> "expense"
+    }
+
+    private fun stableLedgerDisplayId(entry: PocketLocalLedgerEntry): Int =
+        (entry.clientTransactionId.hashCode() and Int.MAX_VALUE).coerceAtLeast(1)
+
+    private fun ledgerDateLabel(date: String): String = runCatching {
+        LocalDate.parse(date).format(DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault()))
+    }.getOrDefault(date)
+
+    private fun ledgerWeekdayLabel(date: String): String = runCatching {
+        LocalDate.parse(date).format(DateTimeFormatter.ofPattern("EEEE", Locale.getDefault()))
+    }.getOrDefault("")
+
+    private fun ledgerMonthLabel(month: String): String = runCatching {
+        LocalDate.parse("$month-01").format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
+    }.getOrDefault(month)
 
     suspend fun accounts(): Result<PocketNativeAccountsResponse> = runCatching {
         syncPendingTransactions()

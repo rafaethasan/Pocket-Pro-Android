@@ -97,10 +97,23 @@ internal class PocketLedgerStore(context: Context) : SQLiteOpenHelper(
     }
 
     fun exportEntries(): List<PocketLocalLedgerEntry> {
-        return readableDatabase.rawQuery(
+        return queryEntries(
             "SELECT client_transaction_id, entry_mode, entry_date, amount_minor, account_id, category_key, payment_method, party_name, note, due_date, sync_state, created_at_epoch_ms FROM local_ledger_entries ORDER BY created_at_epoch_ms ASC",
             null,
-        ).use { cursor ->
+        )
+    }
+
+    fun entriesForMonth(monthValue: String): List<PocketLocalLedgerEntry> {
+        val normalizedMonth = monthValue.trim().takeIf { it.matches(Regex("\\d{4}-\\d{2}")) }
+        if (normalizedMonth == null) return exportEntries()
+        return queryEntries(
+            "SELECT client_transaction_id, entry_mode, entry_date, amount_minor, account_id, category_key, payment_method, party_name, note, due_date, sync_state, created_at_epoch_ms FROM local_ledger_entries WHERE entry_date LIKE ? ORDER BY entry_date DESC, created_at_epoch_ms DESC",
+            arrayOf("$normalizedMonth%"),
+        )
+    }
+
+    private fun queryEntries(sql: String, arguments: Array<String>?): List<PocketLocalLedgerEntry> {
+        return readableDatabase.rawQuery(sql, arguments).use { cursor ->
             buildList {
                 while (cursor.moveToNext()) {
                     add(
