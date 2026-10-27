@@ -13,15 +13,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -32,17 +28,12 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.foundation.BorderStroke
@@ -51,7 +42,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -100,12 +90,9 @@ import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 
-private val HomeElectricBlue = Color(0xFF36B7F5)
-private val HomeFooterBlue = Color(0xFF087A50)
-private val HomeFooterBlueDeep = Color(0xFF56C97A)
-private val HomeBackgroundTop = Color(0xFFEAF2FF)
-private val HomeBackgroundMid = Color(0xFFF6F3FF)
-private val HomeBackgroundBottom = Color(0xFFEFF5FF)
+private val HomeElectricBlue = Color(0xFF58A6FF)
+private val HomeFooterBlue = Color(0xFF1E6DFF)
+private val HomeFooterBlueDeep = Color(0xFF1554D1)
 
 @Composable
 fun HomeNativeScreen(
@@ -129,7 +116,6 @@ fun HomeNativeScreen(
     val preferencesStore = remember { PocketNativePreferencesStore(context) }
     var loading by remember { mutableStateOf(true) }
     var errorText by remember { mutableStateOf("") }
-    var isBalanceVisible by remember { mutableStateOf(false) }
     var dashboardResponse by remember { mutableStateOf<PocketNativeDashboardResponse?>(null) }
     var liveLoanDueReminders by remember { mutableStateOf(preferencesStore.loanDueReminders()) }
     var selectedLoanReminderAction by remember { mutableStateOf<PocketNativeLoanDueReminder?>(null) }
@@ -169,19 +155,6 @@ fun HomeNativeScreen(
     val dashboard = dashboardResponse!!.dashboard!!
     val summary = dashboard.summary
     val user = dashboardResponse!!.user ?: signedInUser
-    val rawGreetingName = user?.fullName?.trim()?.substringBefore(" ")?.ifBlank { "" }.orEmpty()
-    val greetingName = rawGreetingName.takeUnless {
-        it.equals("Pocket", ignoreCase = true) || it.equals("Pocket Pro", ignoreCase = true)
-    }.orEmpty()
-    val displayName = user?.fullName?.trim()
-        ?.takeIf { it.isNotBlank() && !it.equals("Pocket", ignoreCase = true) && !it.equals("Pocket Pro", ignoreCase = true) }
-        ?: user?.username?.trim()?.takeIf { it.isNotBlank() && !it.equals("pocket", ignoreCase = true) }
-        ?: "Pocket Guest"
-    val greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-        in 5..11 -> "Good morning"
-        in 12..16 -> "Good afternoon"
-        else -> "Good evening"
-    }
     val currencySymbol = dashboard.currencySymbol
     val analyticsCategories = dashboard.analytics.categories.take(4)
     val recentItems = dashboard.recentActivity.ifEmpty { sampleRecentActivity() }
@@ -228,25 +201,13 @@ fun HomeNativeScreen(
         }.filter { !it.isBefore(currentMonth) }
         dueDates.minOrNull()?.toString().orEmpty()
     }
-    val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(HomeBackgroundTop, HomeBackgroundMid, HomeBackgroundBottom),
-                ),
-            ),
+    LazyColumn(
+        modifier = Modifier.padding(horizontal = 18.dp),
+        contentPadding = PaddingValues(bottom = 264.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 18.dp),
-            contentPadding = PaddingValues(bottom = 264.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-        item { Spacer(modifier = Modifier.height(statusBarPadding + 18.dp)) }
+        item { Spacer(modifier = Modifier.height(18.dp)) }
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -259,14 +220,8 @@ fun HomeNativeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     PocketUserAvatar(user = user, size = 52.dp)
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = if (greetingName.isNotBlank()) "$greeting, $greetingName" else greeting,
-                            color = AccentBlue,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.sp,
-                        )
-                        Text(displayName, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    Column {
+                        Text("Pocket Pro", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -290,76 +245,28 @@ fun HomeNativeScreen(
             Card(
                 modifier = Modifier.clickable(onClick = onOpenAccounts),
                 colors = CardDefaults.cardColors(containerColor = SurfaceCard),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(26.dp),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f)),
             ) {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(HomeFooterBlue, HomeFooterBlueDeep),
-                                start = androidx.compose.ui.geometry.Offset.Zero,
-                                end = androidx.compose.ui.geometry.Offset.Infinite,
                             ),
-                        ),
+                        )
+                        .padding(horizontal = 20.dp, vertical = 18.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 0.dp, end = 0.dp)
-                            .size(118.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.10f)),
-                    )
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 44.dp, end = 38.dp)
-                            .size(54.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f)),
-                    )
-                    Column(
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Main wallet",
-                                color = Color.White.copy(alpha = 0.92f),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                            )
-                        }
-                        WalletChip()
-                    }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("Available balance", color = Color.White.copy(alpha = 0.68f), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-                                IconButton(
-                                    onClick = { isBalanceVisible = !isBalanceVisible },
-                                    modifier = Modifier.size(30.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = if (isBalanceVisible) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
-                                        contentDescription = if (isBalanceVisible) "Hide available balance" else "Show available balance",
-                                        tint = Color.White.copy(alpha = 0.78f),
-                                        modifier = Modifier.size(17.dp),
-                                    )
-                                }
-                            }
+                            Text("Available balance", color = Color.White.copy(alpha = 0.68f), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                             Text(
-                                text = if (isBalanceVisible) formatCurrency(summary.totalBalance, currencySymbol) else "$currencySymbol ****",
-                                color = Color.White,
+                                text = formatCurrency(summary.totalBalance, currencySymbol),
+                                color = TextPrimary,
                                 fontSize = 34.sp,
                                 fontWeight = FontWeight.Black,
-                                modifier = Modifier.clickable { isBalanceVisible = !isBalanceVisible },
                             )
                         }
                     }
@@ -374,64 +281,170 @@ fun HomeNativeScreen(
                         HeroMiniMetric("Expense", formatCurrency(summary.monthExpense, currencySymbol), Modifier.weight(1f))
                         HeroMiniMetric("Net", formatSignedAmount(summary.totalBalance, currencySymbol), Modifier.weight(1f))
                     }
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onOpenAdd,
-                        color = Color.White.copy(alpha = 0.16f),
-                        shape = RoundedCornerShape(18.dp),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.28f)),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(21.dp),
-                            )
-                            Text(
-                                text = "Add transaction",
-                                color = Color.White,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f),
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.ChevronRight,
-                                contentDescription = null,
-                                tint = Color.White.copy(alpha = 0.90f),
-                                modifier = Modifier.size(19.dp),
-                            )
-                        }
-                    }
-                    }
                 }
             }
         }
         item {
-            HomeShortcutRow(
+            DueThisMonthStrip(
+                installmentCount = thisMonthInstallments.size,
+                installmentTotal = formatCurrency(thisMonthInstallmentTotal, currencySymbol),
+                loanCount = thisMonthLoanReminders.size,
+                loanTotal = formatCurrency(thisMonthLoanTotal, currencySymbol),
+                monthlyCount = thisMonthMonthlyReminders.size,
+                nextDueLabel = nextDueLabel,
+                onClick = onOpenBudget,
+            )
+        }
+        item {
+            TodayStrip(
+                income = formatCurrency(summary.todayIncome, currencySymbol),
+                expense = formatCurrency(summary.todayExpense, currencySymbol),
+                net = formatSignedAmount(todayNet, currencySymbol),
+                netAccent = if (todayNet >= 0) AccentBlue else AccentOrange,
+            )
+        }
+        item { SectionHeader("Quick actions", "") }
+        item {
+            QuickActionRow(
                 items = listOf(
-                    HomeShortcutItem("Accounts", Icons.Rounded.AccountBalanceWallet, AccentPurple, onOpenAccounts),
-                    HomeShortcutItem("Records", Icons.AutoMirrored.Rounded.ReceiptLong, AccentBlue, onOpenRecords),
-                    HomeShortcutItem("Plans", Icons.Rounded.CalendarMonth, AccentOrange, onOpenBudget),
-                    HomeShortcutItem("Reports", Icons.Rounded.BarChart, AccentGreen, onOpenReports),
+                    HomeQuickActionItem("Add entry", AccentPink, pocketFeatureAssetName("add"), pocketFeatureIcon("add"), onOpenAdd),
+                    HomeQuickActionItem("Records", HomeElectricBlue, pocketFeatureAssetName("records"), pocketFeatureIcon("records"), onOpenRecords),
+                    HomeQuickActionItem("Plans", AccentOrange, pocketFeatureAssetName("plans"), pocketFeatureIcon("plans"), onOpenBudget),
+                    HomeQuickActionItem("Goals", AccentPurple, pocketFeatureAssetName("goals"), pocketFeatureIcon("goals"), onOpenGoals),
                 ),
             )
         }
-        if (thisMonthInstallments.isNotEmpty() || thisMonthLoanReminders.isNotEmpty() || thisMonthMonthlyReminders.isNotEmpty()) {
+        item {
+            QuickActionRow(
+                items = listOf(
+                    HomeQuickActionItem("Accounts", HomeElectricBlue, pocketFeatureAssetName("accounts"), pocketFeatureIcon("accounts"), onOpenAccounts),
+                    HomeQuickActionItem("Search", AccentPurple, pocketFeatureAssetName("search"), pocketFeatureIcon("search"), onOpenSearch),
+                    HomeQuickActionItem("Reports", AccentOrange, pocketFeatureAssetName("reports"), pocketFeatureIcon("reports"), onOpenReports),
+                    HomeQuickActionItem("More", AccentPurple, pocketFeatureAssetName("more"), pocketFeatureIcon("more"), onOpenMore),
+                ),
+            )
+        }
+        item {
+            PocketAdBanner(modifier = Modifier.fillMaxWidth())
+        }
+        item { SectionHeader("Money reminders", "") }
+        if (pendingLoanReminders.isNotEmpty() || installmentReminders.isNotEmpty() || monthlyReminders.isNotEmpty()) {
+            items(pendingLoanReminders, key = { it.id }) { reminder ->
+                val remainingAmount = pocketLoanReminderRemainingAmount(reminder)
+                val originalAmount = pocketLoanReminderOriginalAmount(reminder)
+                val settledAmount = pocketLoanReminderSettledAmount(reminder)
+                HomeReminderRow(
+                    icon = if (reminder.kind == "lent") Icons.Rounded.Payments else Icons.AutoMirrored.Rounded.ReceiptLong,
+                    title = if (reminder.kind == "lent") {
+                        "Collect from ${reminder.counterparty.ifBlank { "someone" }}"
+                    } else {
+                        "Pay back to ${reminder.counterparty.ifBlank { "someone" }}"
+                    },
+                    subtitle = if (settledAmount > 0.0 && originalAmount > 0.0) {
+                        "${reminder.dueDate} • ${formatCurrency(remainingAmount, currencySymbol)} left of ${formatCurrency(originalAmount, currencySymbol)}"
+                    } else {
+                        "${reminder.dueDate} • ${formatCurrency(remainingAmount, currencySymbol)}"
+                    },
+                    accent = if (reminder.kind == "lent") AccentGreen else AccentOrange,
+                    onClick = {
+                        onOpenBudgetTarget("loan", reminder.id)
+                    },
+                    actionLabel = if (reminder.kind == "lent") "Get Back" else "Pay Back",
+                    onActionClick = {
+                        onOpenLoanShortcut(
+                            if (reminder.kind == "lent") "receive" else "repay",
+                            reminder.id,
+                            reminder.counterparty,
+                            remainingAmount,
+                            originalAmount,
+                            reminder.dueDate,
+                            reminder.note,
+                        )
+                    },
+                    secondaryActionLabel = "Edit",
+                    onSecondaryActionClick = {
+                        editingLoanReminderFull = reminder
+                    },
+                    tertiaryActionLabel = "Done",
+                    onTertiaryActionClick = {
+                        pendingDoneLoanReminder = reminder
+                    },
+                )
+            }
+            items(installmentReminders, key = { it.id }) { plan ->
+                val remainingInstallments = (plan.totalInstallments - plan.paidInstallments).coerceAtLeast(0)
+                val dueDate = runCatching { LocalDate.parse(plan.nextDueDate) }.getOrNull()
+                val isOverdue = dueDate?.isBefore(LocalDate.now()) == true
+                HomeReminderRow(
+                    icon = Icons.Rounded.CalendarMonth,
+                    title = pocketNormalizeInstallmentTitle(plan.title, plan.categoryLabel),
+                    subtitle = if (isOverdue) {
+                        "Overdue since ${plan.nextDueDate} • ${formatCurrency(plan.installmentAmount, currencySymbol)} • $remainingInstallments left"
+                    } else {
+                        "${plan.nextDueDate} • ${formatCurrency(plan.installmentAmount, currencySymbol)} • ${plan.categoryLabel} • $remainingInstallments left"
+                    },
+                    accent = if (isOverdue) AccentPink else AccentOrange,
+                    onClick = { onOpenBudgetTarget("installment", plan.id) },
+                )
+            }
+            items(monthlyReminders, key = { it.id }) { reminder ->
+                HomeReminderRow(
+                    icon = Icons.Rounded.NotificationsNone,
+                    title = reminder.title,
+                    subtitle = "Every month on ${reminder.dayOfMonth}",
+                    accent = AccentBlue,
+                    onClick = {
+                        if (reminder.kind == "budget" && reminder.linkedBudgetId > 0) {
+                            onOpenBudgetTarget("budget", reminder.linkedBudgetId.toString())
+                        } else {
+                            onOpenBudgetTarget("monthly", reminder.id)
+                        }
+                    },
+                )
+            }
+        } else {
             item {
-                DueThisMonthStrip(
-                    installmentCount = thisMonthInstallments.size,
-                    installmentTotal = formatCurrency(thisMonthInstallmentTotal, currencySymbol),
-                    loanCount = thisMonthLoanReminders.size,
-                    loanTotal = formatCurrency(thisMonthLoanTotal, currencySymbol),
-                    monthlyCount = thisMonthMonthlyReminders.size,
-                    nextDueLabel = nextDueLabel,
+                NativeEmptyCard("No due reminders yet. Open Plans to add monthly bills, installments, or loan follow-up reminders.")
+            }
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                InsightStrip(
+                    title = "Budget used",
+                    value = "${summary.budgetUsedPercent}%",
+                    subtitle = "${formatCurrency(summary.budgetSpent, currencySymbol)} spent",
+                    progress = summary.budgetUsedPercent / 100f,
+                    accent = AccentOrange,
+                    modifier = Modifier.weight(1f),
                     onClick = onOpenBudget,
                 )
+                InsightStrip(
+                    title = "Goal progress",
+                    value = "${summary.goalProgressPercent}%",
+                    subtitle = "${formatCurrency(summary.goalSaved, currencySymbol)} saved",
+                    progress = summary.goalProgressPercent / 100f,
+                    accent = AccentPurple,
+                    modifier = Modifier.weight(1f),
+                    onClick = onOpenGoals,
+                )
+            }
+        }
+        item {
+            SectionHeader("Top spending", "")
+        }
+        item {
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (analyticsCategories.isEmpty()) {
+                    Text("Expense insights will appear here after you add a few records.", color = TextSecondary)
+                } else {
+                    analyticsCategories.forEach { item ->
+                        FlatAnalyticsRow(item = item, currencySymbol = currencySymbol, onClick = onOpenReports)
+                    }
+                }
             }
         }
         item {
@@ -451,15 +464,14 @@ fun HomeNativeScreen(
                 }
             }
         }
-        items(recentItems.take(5)) { item ->
+        items(recentItems.take(4)) { item ->
             RecentActivityRow(
                 item = item,
                 currencySymbol = currencySymbol,
                 onClick = { onOpenRecentActivity(item) },
             )
         }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-        }
+        item { Spacer(modifier = Modifier.height(8.dp)) }
     }
 
     editingLoanReminder?.let { reminder ->
@@ -625,11 +637,6 @@ private fun DueThisMonthStrip(
     nextDueLabel: String,
     onClick: () -> Unit,
 ) {
-    val dueInfo = if (nextDueLabel.isBlank()) {
-        "Review upcoming installments, loans and bills in Plans."
-    } else {
-        "Next due: $nextDueLabel. Review upcoming installments, loans and bills in Plans."
-    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -644,9 +651,8 @@ private fun DueThisMonthStrip(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Needs attention", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                NativeInlineInfoButton(title = "Needs attention", message = dueInfo)
+            Column {
+                Text("Due this month", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
             Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(18.dp))
         }
@@ -654,15 +660,15 @@ private fun DueThisMonthStrip(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            HeroMiniMetric("Installments", "$installmentCount • $installmentTotal", Modifier.weight(1f), TextSecondary, TextPrimary)
-            HeroMiniMetric("Loans", "$loanCount • $loanTotal", Modifier.weight(1f), TextSecondary, TextPrimary)
-            HeroMiniMetric("Bills", monthlyCount.toString(), Modifier.weight(1f), TextSecondary, TextPrimary)
+            HeroMiniMetric("Installments", "$installmentCount • $installmentTotal", Modifier.weight(1f))
+            HeroMiniMetric("Loans", "$loanCount • $loanTotal", Modifier.weight(1f))
+            HeroMiniMetric("Bills", monthlyCount.toString(), Modifier.weight(1f))
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(TextSecondary.copy(alpha = 0.12f)),
+                .background(Color.White.copy(alpha = 0.06f)),
         )
     }
 }
@@ -1011,7 +1017,6 @@ private fun HomeReminderRow(
 
 private data class HomeQuickActionItem(
     val title: String,
-    val subtitle: String,
     val accent: Color,
     val assetName: String?,
     val icon: ImageVector,
@@ -1020,109 +1025,13 @@ private data class HomeQuickActionItem(
 
 @Composable
 private fun SectionHeader(title: String, subtitle: String, modifier: Modifier = Modifier) {
-    Row(
+    Column(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
         Text(title, color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         if (subtitle.isNotBlank()) {
-            NativeInlineInfoButton(title = title, message = subtitle)
-        }
-    }
-}
-
-private data class HomeShortcutItem(
-    val title: String,
-    val icon: ImageVector,
-    val color: Color,
-    val onClick: () -> Unit,
-)
-
-@Composable
-private fun HomeShortcutRow(items: List<HomeShortcutItem>) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        items.forEach { item ->
-            Surface(
-                modifier = Modifier.weight(1f),
-                onClick = item.onClick,
-                color = Color.White.copy(alpha = 0.88f),
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, item.color.copy(alpha = 0.16f)),
-                shadowElevation = 2.dp,
-            ) {
-                Column(
-                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(7.dp),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(RoundedCornerShape(13.dp))
-                            .background(item.color.copy(alpha = 0.13f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.title,
-                            tint = item.color,
-                            modifier = Modifier.size(21.dp),
-                        )
-                    }
-                    Text(
-                        text = item.title,
-                        color = TextPrimary,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HomePrimaryAction(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.horizontalGradient(
-                    colors = listOf(AccentBlue, AccentPurple),
-                ),
-            )
-            .clickable(onClick = onClick),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Add,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(22.dp),
-            )
-            Text(
-                text = "Add transaction",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = Icons.Rounded.ChevronRight,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.82f),
-                modifier = Modifier.size(20.dp),
-            )
+            Text(subtitle, color = TextSecondary, fontSize = 12.sp)
         }
     }
 }
@@ -1139,9 +1048,8 @@ private fun HeaderActionButton(
         modifier = Modifier
             .size(54.dp)
             .clickable(onClick = onClick),
-        color = Color(0xFFF0F4FF),
+        color = SurfaceCard,
         shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, Color(0xFFDCE6FF)),
     ) {
         Box(contentAlignment = Alignment.Center) {
             PocketSvgIcon(
@@ -1174,49 +1082,16 @@ private fun HeaderActionButton(
 }
 
 @Composable
-private fun WalletChip() {
-    Box(
-        modifier = Modifier
-            .width(35.dp)
-            .height(26.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(Color(0xFFFFD46A).copy(alpha = 0.92f))
-            .border(1.dp, Color.White.copy(alpha = 0.38f), RoundedCornerShape(6.dp)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Color(0xFF8A6111).copy(alpha = 0.62f)),
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 11.dp, vertical = 3.dp)
-                .border(1.dp, Color(0xFF8A6111).copy(alpha = 0.50f), RoundedCornerShape(2.dp)),
-        )
-    }
-}
-
-@Composable
-private fun HeroMiniMetric(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    titleColor: Color = Color.White.copy(alpha = 0.56f),
-    valueColor: Color = Color.White,
-) {
+private fun HeroMiniMetric(title: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.10f))
-            .border(1.dp, Color.White.copy(alpha = 0.07f), RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.03f))
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text(title, color = titleColor.copy(alpha = 0.92f), fontWeight = FontWeight.Medium, fontSize = 10.sp)
-        Text(value, color = valueColor, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Text(title, color = Color.White.copy(alpha = 0.56f), fontWeight = FontWeight.Medium, fontSize = 10.sp)
+        Text(value, color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -1307,7 +1182,6 @@ private fun QuickActionRow(items: List<HomeQuickActionItem>) {
 
 @Composable
 private fun ActionTile(item: HomeQuickActionItem, modifier: Modifier = Modifier) {
-    var showInfo by remember(item.title) { mutableStateOf(false) }
     Card(
         onClick = item.onClick,
         modifier = modifier,
@@ -1334,45 +1208,15 @@ private fun ActionTile(item: HomeQuickActionItem, modifier: Modifier = Modifier)
                     modifier = Modifier.size(30.dp),
                 )
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    item.title,
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                IconButton(
-                    onClick = { showInfo = true },
-                    modifier = Modifier.size(26.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Info,
-                        contentDescription = "About ${item.title}",
-                        tint = TextSecondary,
-                        modifier = Modifier.size(15.dp),
-                    )
-                }
-            }
+            Text(
+                item.title,
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
-    }
-    if (showInfo) {
-        AlertDialog(
-            onDismissRequest = { showInfo = false },
-            confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
-                    Text("Got it", color = AccentBlue, fontWeight = FontWeight.SemiBold)
-                }
-            },
-            title = { Text(item.title, color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = { Text(item.subtitle, color = TextSecondary, lineHeight = 20.sp) },
-            containerColor = SurfaceCard,
-            shape = RoundedCornerShape(20.dp),
-        )
     }
 }
 
@@ -1437,16 +1281,13 @@ private fun HomeErrorCard(errorText: String) {
 
 @Composable
 private fun RecentActivityRow(item: PocketNativeRecentActivity, currencySymbol: String, onClick: () -> Unit) {
-    val activityColor = parseColor(item.colorHex)
-    val detailLabel = item.note.takeIf { it.isNotBlank() && it != item.date }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
-            .background(SurfaceCard)
-            .border(1.dp, Color(0xFFDFE8FC), RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(SurfaceCard.copy(alpha = 0.38f))
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 15.dp),
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
@@ -1455,36 +1296,17 @@ private fun RecentActivityRow(item: PocketNativeRecentActivity, currencySymbol: 
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(RoundedCornerShape(15.dp))
-                        .background(activityColor.copy(alpha = 0.13f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = homeActivityIcon(item),
-                        contentDescription = null,
-                        tint = activityColor,
-                        modifier = Modifier.size(23.dp),
-                    )
-                }
+                Icon(homeActivityIcon(item), contentDescription = null, tint = parseColor(item.colorHex), modifier = Modifier.size(20.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(item.label, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text(detailLabel ?: item.date, color = TextSecondary, fontSize = 13.sp)
+                    Text(item.label, color = TextPrimary, fontWeight = FontWeight.Bold)
+                    Text(item.note.ifBlank { item.date }, color = TextSecondary)
                 }
             }
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = formatSignedAmount(item.amount, currencySymbol),
-                    color = if (item.amount >= 0) AccentGreen else AccentPink,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                )
-                if (detailLabel != null) {
-                    Text(item.date, color = TextSecondary, fontSize = 11.sp)
-                }
-            }
+            Text(
+                text = formatSignedAmount(item.amount, currencySymbol),
+                color = if (item.amount >= 0) AccentGreen else AccentPink,
+                fontWeight = FontWeight.Bold,
+            )
         }
     }
 }
