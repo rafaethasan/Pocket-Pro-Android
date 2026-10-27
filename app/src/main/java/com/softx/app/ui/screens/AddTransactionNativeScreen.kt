@@ -35,7 +35,6 @@ import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AttachMoney
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.Checkroom
@@ -1722,26 +1721,10 @@ private fun NativeCategoryChip(
                 shape = RoundedCornerShape(16.dp),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 10.dp),
+            .padding(horizontal = 8.dp, vertical = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(7.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .background(
-                    if (selected) AccentPurple.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.06f),
-                    CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = pocketCategoryVisualIcon(item.key),
-                contentDescription = null,
-                tint = if (selected) AccentPurple else TextSecondary,
-                modifier = Modifier.size(18.dp),
-            )
-        }
         Text(
             text = item.label,
             color = if (selected) TextPrimary else TextSecondary,
