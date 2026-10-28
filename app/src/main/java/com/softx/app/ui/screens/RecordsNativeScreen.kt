@@ -79,6 +79,7 @@ import com.softx.app.data.PocketNativeRecordGroup
 import com.softx.app.data.PocketNativeRecordItem
 import com.softx.app.data.PocketNativeRecordsPayload
 import com.softx.app.data.PocketNativeRecordsResponse
+import com.softx.app.data.PocketNativePreferencesStore
 import com.softx.app.data.PocketNativeRepository
 import com.softx.app.data.PocketNativeUser
 import com.softx.app.ui.theme.AccentBlue
@@ -102,6 +103,7 @@ fun RecordsNativeScreen(
     onEditRecord: (PocketNativeRecordItem) -> Unit = {},
 ) {
     val context = LocalContext.current
+    val preferencesStore = remember(context) { PocketNativePreferencesStore(context) }
     val scope = rememberCoroutineScope()
     val initialMonthValue = remember { currentMonthValue() }
     val initialCachedResponse = remember(repository, initialMonthValue) {
@@ -160,6 +162,13 @@ fun RecordsNativeScreen(
                 )
             }
         }
+        return
+    }
+
+    // The public guest endpoint returns showcase rows. Keep a brand-new local space
+    // genuinely empty until the owner creates the first real entry.
+    if (signedInUser?.demoAccessEnabled == true && !preferencesStore.hasRecordedAnyMoneyEntry()) {
+        FreshRecordsEmptyState()
         return
     }
 
@@ -319,6 +328,31 @@ fun RecordsNativeScreen(
             }
         }
         item { FlatDivider() }
+    }
+}
+
+@Composable
+private fun FreshRecordsEmptyState() {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth().background(SurfaceBase),
+        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 28.dp + 176.dp),
+    ) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceCard, RoundedCornerShape(24.dp))
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text("No records yet", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Your income, expenses and loan activity will appear here after you add your first entry.",
+                    color = TextSecondary,
+                    lineHeight = 21.sp,
+                )
+            }
+        }
     }
 }
 

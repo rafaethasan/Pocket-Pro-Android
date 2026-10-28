@@ -246,6 +246,8 @@ class PocketNativePreferencesStore(
         }
     }
 
+    fun hasRecordedAnyMoneyEntry(): Boolean = prefs.getBoolean(KEY_HAS_RECORDED_MONEY_ENTRY, false)
+
     fun monthlyReminders(): List<PocketNativeMonthlyReminder> {
         val raw = prefs.getString(KEY_MONTHLY_REMINDERS, "[]") ?: "[]"
         return runCatching {
@@ -925,6 +927,7 @@ class PocketNativePreferencesStore(
         prefs.edit()
             .putString(KEY_LAST_MONEY_ENTRY_DATE, todayIso)
             .putInt(KEY_TODAY_MONEY_ENTRY_COUNT, nextCount)
+            .putBoolean(KEY_HAS_RECORDED_MONEY_ENTRY, true)
             .apply()
     }
 
@@ -997,6 +1000,7 @@ class PocketNativePreferencesStore(
         private const val KEY_BILLING_ENTITLEMENT = "billing_entitlement"
         private const val KEY_LAST_MONEY_ENTRY_DATE = "last_money_entry_date"
         private const val KEY_TODAY_MONEY_ENTRY_COUNT = "today_money_entry_count"
+        private const val KEY_HAS_RECORDED_MONEY_ENTRY = "has_recorded_money_entry"
 
         const val DEFAULT_LANGUAGE_CODE = "en"
         const val DEFAULT_CURRENCY_CODE = "BDT"

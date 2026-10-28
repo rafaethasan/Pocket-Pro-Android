@@ -60,8 +60,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -396,6 +400,11 @@ private fun NativeShell(
     var appUnlocked by rememberSaveable { mutableStateOf(!preferencesStore.appLockEnabled()) }
     var showHomeTour by rememberSaveable { mutableStateOf(false) }
     var homeTourStep by rememberSaveable { mutableStateOf(0) }
+    var homeTourBalanceBounds by remember { mutableStateOf<Rect?>(null) }
+    var homeTourAddBounds by remember { mutableStateOf<Rect?>(null) }
+    var homeTourRecordsBounds by remember { mutableStateOf<Rect?>(null) }
+    var homeTourReportsBounds by remember { mutableStateOf<Rect?>(null) }
+    var homeTourMoreBounds by remember { mutableStateOf<Rect?>(null) }
     var unlockPin by remember { mutableStateOf("") }
     var unlockError by remember { mutableStateOf("") }
     var budgetJumpType by rememberSaveable { mutableStateOf("") }
@@ -697,6 +706,15 @@ private fun NativeShell(
             if (activeTab != BottomDestination.Add) {
                 PocketFloatingBottomBar(
                     activeTab = activeTab,
+                    onDestinationBounds = { destination, bounds ->
+                        when (destination) {
+                            BottomDestination.Add -> homeTourAddBounds = bounds
+                            BottomDestination.Records -> homeTourRecordsBounds = bounds
+                            BottomDestination.Reports -> homeTourReportsBounds = bounds
+                            BottomDestination.Profile -> homeTourMoreBounds = bounds
+                            BottomDestination.Home -> Unit
+                        }
+                    },
                     onSelect = { destination ->
                         featureScreen = null
                         if (destination == BottomDestination.Add) {
@@ -873,6 +891,7 @@ private fun NativeShell(
                     BottomDestination.Home -> HomeNativeScreen(
                         repository = repository,
                         signedInUser = currentSignedInUser,
+                        onBalanceTourBounds = { homeTourBalanceBounds = it },
                         onOpenAccounts = { featureScreen = NativeFeatureScreen.Accounts },
                         onOpenBudget = { featureScreen = NativeFeatureScreen.Budget },
                         onOpenBudgetTarget = { type, id ->
@@ -1309,6 +1328,11 @@ private fun NativeShell(
     if (showHomeTour && activeTab == BottomDestination.Home && featureScreen == null) {
         HomeFeatureTourOverlay(
             step = homeTourStep,
+            balanceBounds = homeTourBalanceBounds,
+            addBounds = homeTourAddBounds,
+            recordsBounds = homeTourRecordsBounds,
+            reportsBounds = homeTourReportsBounds,
+            moreBounds = homeTourMoreBounds,
             onNext = {
                 if (homeTourStep == 3) {
                     closeHomeTour()
@@ -1325,6 +1349,11 @@ private fun NativeShell(
 @Composable
 private fun HomeFeatureTourOverlay(
     step: Int,
+    balanceBounds: Rect?,
+    addBounds: Rect?,
+    recordsBounds: Rect?,
+    reportsBounds: Rect?,
+    moreBounds: Rect?,
     onNext: () -> Unit,
     onSkip: () -> Unit,
 ) {
@@ -1342,37 +1371,13 @@ private fun HomeFeatureTourOverlay(
             .background(Color(0xB80A1020)),
     ) {
         when (step) {
-            0 -> Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 112.dp, start = 22.dp, end = 22.dp)
-                    .fillMaxWidth()
-                    .height(176.dp)
-                    .border(2.dp, Color.White, RoundedCornerShape(28.dp)),
-            )
-            1 -> Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 68.dp)
-                    .size(94.dp)
-                    .border(3.dp, Color.White, CircleShape),
-            )
-            2 -> Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 20.dp, bottom = 58.dp)
-                    .width(176.dp)
-                    .height(82.dp)
-                    .border(2.dp, Color.White, RoundedCornerShape(26.dp)),
-            )
-            else -> Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 20.dp, bottom = 58.dp)
-                    .width(116.dp)
-                    .height(82.dp)
-                    .border(2.dp, Color.White, RoundedCornerShape(26.dp)),
-            )
+            0 -> HomeTourTargetOutline(balanceBounds, RoundedCornerShape(28.dp))
+            1 -> HomeTourTargetOutline(addBounds, CircleShape, 3.dp)
+            2 -> {
+                HomeTourTargetOutline(recordsBounds, RoundedCornerShape(18.dp))
+                HomeTourTargetOutline(reportsBounds, RoundedCornerShape(18.dp))
+            }
+            else -> HomeTourTargetOutline(moreBounds, RoundedCornerShape(18.dp))
         }
 
         androidx.compose.material3.Surface(
@@ -1990,8 +1995,28 @@ private fun PendingLoanPickerRow(
 }
 
 @Composable
+private fun HomeTourTargetOutline(
+    bounds: Rect?,
+    shape: androidx.compose.ui.graphics.Shape,
+    stroke: androidx.compose.ui.unit.Dp = 2.dp,
+) {
+    if (bounds == null || bounds.width <= 0f || bounds.height <= 0f) return
+    val density = LocalDensity.current
+    Box(
+        modifier = with(density) {
+            Modifier
+                .padding(start = bounds.left.toDp(), top = bounds.top.toDp())
+                .width(bounds.width.toDp())
+                .height(bounds.height.toDp())
+                .border(stroke, Color.White, shape)
+        },
+    )
+}
+
+@Composable
 private fun PocketFloatingBottomBar(
     activeTab: BottomDestination,
+    onDestinationBounds: (BottomDestination, Rect) -> Unit,
     onSelect: (BottomDestination) -> Unit,
 ) {
     val destinations = BottomDestination.entries
@@ -2075,6 +2100,7 @@ private fun PocketFloatingBottomBar(
                                             color = AccentPurple,
                                             shape = CircleShape,
                                         )
+                                        .onGloballyPositioned { onDestinationBounds(destination, it.boundsInRoot()) }
                                         .clickable { onSelect(destination) },
                                     contentAlignment = Alignment.Center,
                                 ) {
@@ -2094,6 +2120,7 @@ private fun PocketFloatingBottomBar(
                                 .fillMaxHeight()
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(if (selected) AccentPurple.copy(alpha = 0.12f) else Color.Transparent)
+                                .onGloballyPositioned { onDestinationBounds(destination, it.boundsInRoot()) }
                                 .clickable { onSelect(destination) }
                                 .padding(top = 6.dp, bottom = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,

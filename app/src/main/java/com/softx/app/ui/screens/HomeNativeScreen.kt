@@ -34,6 +34,8 @@ import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.foundation.BorderStroke
@@ -42,6 +44,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -64,6 +67,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import com.softx.app.PocketReminderScheduler
 import com.softx.app.data.PocketNativeAnalyticsCategory
 import com.softx.app.data.PocketNativeLoanDueReminder
@@ -98,6 +104,7 @@ private val HomeFooterBlueDeep = Color(0xFF1554D1)
 fun HomeNativeScreen(
     repository: PocketNativeRepository,
     signedInUser: PocketNativeUser?,
+    onBalanceTourBounds: (Rect) -> Unit,
     onOpenAccounts: () -> Unit,
     onOpenBudget: () -> Unit,
     onOpenBudgetTarget: (String, String) -> Unit,
@@ -123,6 +130,7 @@ fun HomeNativeScreen(
     var editingLoanReminderFull by remember { mutableStateOf<PocketNativeLoanDueReminder?>(null) }
     var snoozingLoanReminder by remember { mutableStateOf<PocketNativeLoanDueReminder?>(null) }
     var pendingDoneLoanReminder by remember { mutableStateOf<PocketNativeLoanDueReminder?>(null) }
+    var balanceVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         loading = true
@@ -156,8 +164,9 @@ fun HomeNativeScreen(
     val summary = dashboard.summary
     val user = dashboardResponse!!.user ?: signedInUser
     val currencySymbol = dashboard.currencySymbol
-    val analyticsCategories = dashboard.analytics.categories.take(4)
-    val recentItems = dashboard.recentActivity.ifEmpty { sampleRecentActivity() }
+    val isFreshGuestSpace = user?.demoAccessEnabled == true && !preferencesStore.hasRecordedAnyMoneyEntry()
+    val analyticsCategories = if (isFreshGuestSpace) emptyList() else dashboard.analytics.categories.take(4)
+    val recentItems = if (isFreshGuestSpace) emptyList() else dashboard.recentActivity
     val todayNet = summary.todayIncome - summary.todayExpense
     val pendingLoanReminders = remember(liveLoanDueReminders) { liveLoanDueReminders.filter { it.status == "pending" }.take(1) }
     val allInstallmentReminders = remember(dashboardResponse) { preferencesStore.installmentPlans().filter { it.status == "active" } }
@@ -243,7 +252,9 @@ fun HomeNativeScreen(
         }
         item {
             Card(
-                modifier = Modifier.clickable(onClick = onOpenAccounts),
+                modifier = Modifier
+                    .onGloballyPositioned { onBalanceTourBounds(it.boundsInRoot()) }
+                    .clickable(onClick = onOpenAccounts),
                 colors = CardDefaults.cardColors(containerColor = SurfaceCard),
                 shape = RoundedCornerShape(26.dp),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f)),
@@ -259,14 +270,24 @@ fun HomeNativeScreen(
                         .padding(horizontal = 20.dp, vertical = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("Available balance", color = Color.White.copy(alpha = 0.68f), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                             Text(
-                                text = formatCurrency(summary.totalBalance, currencySymbol),
+                                text = when {
+                                    balanceVisible -> formatCurrency(if (isFreshGuestSpace) 0.0 else summary.totalBalance, currencySymbol)
+                                    else -> "••••••"
+                                },
                                 color = TextPrimary,
                                 fontSize = 34.sp,
                                 fontWeight = FontWeight.Black,
+                            )
+                        }
+                        IconButton(onClick = { balanceVisible = !balanceVisible }) {
+                            Icon(
+                                imageVector = if (balanceVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                                contentDescription = if (balanceVisible) "Hide balance" else "Show balance",
+                                tint = Color.White.copy(alpha = 0.82f),
                             )
                         }
                     }
@@ -277,9 +298,9 @@ fun HomeNativeScreen(
                             .background(Color.White.copy(alpha = 0.08f)),
                     )
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        HeroMiniMetric("Income", formatCurrency(summary.monthIncome, currencySymbol), Modifier.weight(1f))
-                        HeroMiniMetric("Expense", formatCurrency(summary.monthExpense, currencySymbol), Modifier.weight(1f))
-                        HeroMiniMetric("Net", formatSignedAmount(summary.totalBalance, currencySymbol), Modifier.weight(1f))
+                        HeroMiniMetric("Income", if (isFreshGuestSpace) "—" else formatCurrency(summary.monthIncome, currencySymbol), Modifier.weight(1f))
+                        HeroMiniMetric("Expense", if (isFreshGuestSpace) "—" else formatCurrency(summary.monthExpense, currencySymbol), Modifier.weight(1f))
+                        HeroMiniMetric("Net", if (isFreshGuestSpace) "—" else formatSignedAmount(summary.totalBalance, currencySymbol), Modifier.weight(1f))
                     }
                 }
             }
@@ -299,9 +320,9 @@ fun HomeNativeScreen(
         }
         item {
             TodayStrip(
-                income = formatCurrency(summary.todayIncome, currencySymbol),
-                expense = formatCurrency(summary.todayExpense, currencySymbol),
-                net = formatSignedAmount(todayNet, currencySymbol),
+                income = if (isFreshGuestSpace) "—" else formatCurrency(summary.todayIncome, currencySymbol),
+                expense = if (isFreshGuestSpace) "—" else formatCurrency(summary.todayExpense, currencySymbol),
+                net = if (isFreshGuestSpace) "—" else formatSignedAmount(todayNet, currencySymbol),
                 netAccent = if (todayNet >= 0) AccentBlue else AccentOrange,
             )
         }
@@ -1365,9 +1386,3 @@ private fun parseColor(hex: String): Color = try {
 } catch (_: Exception) {
     AccentPurple
 }
-
-private fun sampleRecentActivity(): List<PocketNativeRecentActivity> = listOf(
-    PocketNativeRecentActivity(id = 1, label = "Salary deposit", note = "Income", date = "Today", amount = 25000.0, colorHex = "#3D8DFF"),
-    PocketNativeRecentActivity(id = 2, label = "Groceries", note = "Expense", date = "Today", amount = -2200.0, colorHex = "#FF4DA6"),
-    PocketNativeRecentActivity(id = 3, label = "Savings deposit", note = "Goal", date = "Yesterday", amount = 5000.0, colorHex = "#19D38A"),
-)

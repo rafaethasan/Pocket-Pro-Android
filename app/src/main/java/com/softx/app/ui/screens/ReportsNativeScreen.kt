@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.softx.app.data.PocketNativeAnalyticsCategory
 import com.softx.app.data.PocketNativeDashboardResponse
+import com.softx.app.data.PocketNativePreferencesStore
 import com.softx.app.data.PocketNativeRepository
 import com.softx.app.data.PocketNativeUser
 import com.softx.app.ui.theme.AccentBlue
@@ -70,6 +71,7 @@ fun ReportsNativeScreen(
     onOpenSmartInsights: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    val preferencesStore = remember(context) { PocketNativePreferencesStore(context) }
     val scope = rememberCoroutineScope()
     val initialCachedResponse = remember(repository) { repository.cachedDashboard() }
     var loading by remember { mutableStateOf(initialCachedResponse == null) }
@@ -116,6 +118,12 @@ fun ReportsNativeScreen(
                 )
             }
         }
+        return
+    }
+
+    // Do not expose server-provided showcase analytics in a brand-new guest space.
+    if (signedInUser?.demoAccessEnabled == true && !preferencesStore.hasRecordedAnyMoneyEntry()) {
+        FreshReportsEmptyState()
         return
     }
 
@@ -370,6 +378,31 @@ fun ReportsNativeScreen(
             gate = gate,
             onDismiss = { lockedFeature = null },
         )
+    }
+}
+
+@Composable
+private fun FreshReportsEmptyState() {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 28.dp + 176.dp),
+    ) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceCard, RoundedCornerShape(24.dp))
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text("Your reports will appear here", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Add income or an expense to see your balance, category breakdown and monthly insights.",
+                    color = TextSecondary,
+                    lineHeight = 21.sp,
+                )
+            }
+        }
     }
 }
 
