@@ -347,9 +347,6 @@ fun HomeNativeScreen(
                 ),
             )
         }
-        item {
-            PocketAdBanner(modifier = Modifier.fillMaxWidth())
-        }
         item { SectionHeader("Money reminders", "") }
         if (pendingLoanReminders.isNotEmpty() || installmentReminders.isNotEmpty() || monthlyReminders.isNotEmpty()) {
             items(pendingLoanReminders, key = { it.id }) { reminder ->
