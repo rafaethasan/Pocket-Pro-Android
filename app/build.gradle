@@ -18,7 +18,7 @@ android {
         applicationId "com.softx.app"
         minSdk 24
         targetSdk 35
-        versionCode 2026103101
+        versionCode 2026103102
         versionName "1.5.0"
         multiDexEnabled true
         buildConfigField "String", "POCKET_BASE_URL", "\"https://pocketpro.corexbd.com/\""
