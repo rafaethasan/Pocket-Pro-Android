@@ -29,7 +29,11 @@
 
         <receiver
             android:name=".PocketReminderReceiver"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.softx.app.ACTION_POCKET_REMINDER_TEST" />
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name=".receiver.PocketSmsReceiver"

@@ -127,6 +127,9 @@ fun HomeNativeScreen(
     val context = LocalContext.current
     val preferencesStore = remember { PocketNativePreferencesStore(context) }
     val isPro = preferencesStore.isProMember()
+    val isBangla = preferencesStore.languageCode() == "bn"
+    val streakDays = preferencesStore.currentStreakDays()
+    var showStreakDialog by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(true) }
     var errorText by remember { mutableStateOf("") }
     var dashboardResponse by remember { mutableStateOf<PocketNativeDashboardResponse?>(null) }
@@ -264,6 +267,24 @@ fun HomeNativeScreen(
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 0.5.sp,
+                            )
+                        }
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFFF5722).copy(alpha = 0.16f),
+                        border = BorderStroke(1.dp, Color(0xFFFF7043).copy(alpha = 0.7f)),
+                        modifier = Modifier.clickable { showStreakDialog = true },
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "🔥 ${if (streakDays > 0) streakDays else 1}d",
+                                color = Color(0xFFFF7043),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
                             )
                         }
                     }
@@ -757,6 +778,55 @@ fun HomeNativeScreen(
                 liveLoanDueReminders = preferencesStore.loanDueReminders()
                 PocketReminderScheduler.ensureDailyReminder(context)
                 pendingDoneLoanReminder = null
+            },
+        )
+    }
+
+    if (showStreakDialog) {
+        AlertDialog(
+            onDismissRequest = { showStreakDialog = false },
+            containerColor = Color(0xFF131826),
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "🔥 ${if (streakDays > 0) "$streakDays Days" else "1 Day"} Money Streak",
+                        color = Color(0xFFFF7043),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                    )
+                }
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = if (isBangla) "অভিনন্দন! আপনি টানা ${if (streakDays > 0) streakDays else 1} দিন নিয়মিত আর্থিক হিসাব রাখছেন।" else "Awesome! You have kept your money tracking streak alive for ${if (streakDays > 0) streakDays else 1} days.",
+                        color = TextPrimary,
+                        fontSize = 14.sp,
+                    )
+                    Text(
+                        text = if (isBangla) "গবেষণায় দেখা গেছে, যারা প্রতিদিন খরচের হিসাব রাখে তারা মাসে গড়ে ৩০% টাকা বেশি সঞ্চয় করতে পারে। ডুওলিঙ্গো যেমন ভাষা শেখায়, পকেট প্রো আপনার আর্থিক অভ্যাস গড়ে তোলে! 🎯" else "Tracking expenses daily helps users save up to 30% more each month. Build a life-changing financial habit with Pocket Pro!",
+                        color = TextSecondary,
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp,
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showStreakDialog = false
+                        onOpenAdd()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7043)),
+                    shape = RoundedCornerShape(10.dp),
+                ) {
+                    Text(if (isBangla) "➕ আজকের খরচ লিখুন" else "➕ Add Today's Entry", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStreakDialog = false }) {
+                    Text(if (isBangla) "পরে" else "Later", color = TextSecondary)
+                }
             },
         )
     }

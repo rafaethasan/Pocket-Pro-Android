@@ -928,16 +928,42 @@ class PocketNativePreferencesStore(
         return savedPin.isNotBlank() && savedPin == pin.filter { it.isDigit() }
     }
 
+    fun currentStreakDays(): Int {
+        val lastDateStr = prefs.getString(KEY_LAST_MONEY_ENTRY_DATE, "") ?: ""
+        if (lastDateStr.isBlank()) return 0
+        val lastDate = runCatching { java.time.LocalDate.parse(lastDateStr) }.getOrNull() ?: return 0
+        val today = java.time.LocalDate.now()
+        val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(lastDate, today)
+        return if (daysDiff <= 1) {
+            prefs.getInt(KEY_STREAK_DAYS, 1).coerceAtLeast(1)
+        } else {
+            0
+        }
+    }
+
     fun markMoneyEntryLogged() {
-        val todayIso = java.time.LocalDate.now().toString()
-        val nextCount = if (lastMoneyEntryLoggedOn() == todayIso) {
+        val today = java.time.LocalDate.now()
+        val todayIso = today.toString()
+        val lastDateStr = lastMoneyEntryLoggedOn()
+        val lastDate = runCatching { java.time.LocalDate.parse(lastDateStr) }.getOrNull()
+
+        val currentStreak = prefs.getInt(KEY_STREAK_DAYS, 0)
+        val nextStreak = when {
+            lastDateStr == todayIso -> currentStreak.coerceAtLeast(1)
+            lastDate != null && java.time.temporal.ChronoUnit.DAYS.between(lastDate, today) == 1L -> currentStreak + 1
+            else -> 1
+        }
+
+        val nextCount = if (lastDateStr == todayIso) {
             prefs.getInt(KEY_TODAY_MONEY_ENTRY_COUNT, 0) + 1
         } else {
             1
         }
+
         prefs.edit()
             .putString(KEY_LAST_MONEY_ENTRY_DATE, todayIso)
             .putInt(KEY_TODAY_MONEY_ENTRY_COUNT, nextCount)
+            .putInt(KEY_STREAK_DAYS, nextStreak)
             .putBoolean(KEY_HAS_RECORDED_MONEY_ENTRY, true)
             .apply()
     }
@@ -1011,6 +1037,7 @@ class PocketNativePreferencesStore(
         private const val KEY_BILLING_ENTITLEMENT = "billing_entitlement"
         private const val KEY_LAST_MONEY_ENTRY_DATE = "last_money_entry_date"
         private const val KEY_TODAY_MONEY_ENTRY_COUNT = "today_money_entry_count"
+        private const val KEY_STREAK_DAYS = "streak_days"
         private const val KEY_HAS_RECORDED_MONEY_ENTRY = "has_recorded_money_entry"
 
         const val DEFAULT_LANGUAGE_CODE = "en"

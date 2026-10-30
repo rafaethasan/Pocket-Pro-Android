@@ -37,7 +37,8 @@ class PocketReminderReceiver : BroadcastReceiver() {
         )
 
         val preferencesStore = PocketNativePreferencesStore(context)
-        if (!preferencesStore.nightlyReminderEnabled()) {
+        val isTestBroadcast = intent?.action == ACTION_POCKET_REMINDER_TEST
+        if (!isTestBroadcast && !preferencesStore.nightlyReminderEnabled()) {
             return
         }
         val reminders = preferencesStore.monthlyReminders()
@@ -203,13 +204,43 @@ class PocketReminderReceiver : BroadcastReceiver() {
             append("Take one minute tonight to keep Pocket Pro complete for today.")
         }
 
+        val addIntent = Intent(context, MainActivity::class.java).apply {
+            putExtra("action", "open_add")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val addPendingIntent = PendingIntent.getActivity(
+            context,
+            2202,
+            addIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val streakDays = preferencesStore.currentStreakDays()
+        val isBangla = preferencesStore.languageCode() == "bn"
+        val pendingLoans = loanReminders.filter { it.status == "pending" }
+        val duoPayload = PocketDuoReminderEngine.generatePayload(
+            loggedToday = loggedToday,
+            streakDays = streakDays,
+            todayEntryCount = todayEntryCount,
+            overdueLoan = pendingLoans.firstOrNull(),
+            isBangla = isBangla,
+        )
+
+        val fullBigText = buildString {
+            append(duoPayload.bigText)
+            if (bigText.isNotBlank()) {
+                append("\n\n")
+                append(bigText)
+            }
+        }
+
         val notificationBuilder = NotificationCompat.Builder(context, PocketReminderScheduler.reminderChannelId())
             .setSmallIcon(R.drawable.ic_pocket_launcher)
-            .setContentTitle(if (!loggedToday) "Pocket Pro nightly check-in" else "Pocket Pro smart reminder")
-            .setContentText(contentText)
+            .setContentTitle(duoPayload.title)
+            .setContentText(duoPayload.message)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(bigText)
+                    .bigText(fullBigText)
             )
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
@@ -217,6 +248,11 @@ class PocketReminderReceiver : BroadcastReceiver() {
             .setShowWhen(true)
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
+            .addAction(
+                android.R.drawable.ic_input_add,
+                duoPayload.actionLabel,
+                addPendingIntent,
+            )
         val soundEnabled = preferencesStore.notificationSoundEnabled()
         val vibrationEnabled = preferencesStore.notificationVibrationEnabled()
         when {
@@ -301,5 +337,9 @@ class PocketReminderReceiver : BroadcastReceiver() {
             else -> "in $daysLeft days"
         }
         return "${plan.title} ${plan.currentDueAmount.toInt()} from ${plan.counterparty} ($suffix)"
+    }
+
+    companion object {
+        const val ACTION_POCKET_REMINDER_TEST = "com.softx.app.ACTION_POCKET_REMINDER_TEST"
     }
 }

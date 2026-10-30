@@ -419,6 +419,31 @@ private fun NativeShell(
     val currentSignedInUser = signedInUser
 
     val pendingSmartTx = PocketSmartIntentHolder.pendingTransaction
+    val pendingQuick = PocketSmartIntentHolder.pendingQuickAction
+    LaunchedEffect(pendingQuick) {
+        if (pendingQuick == "open_add") {
+            PocketSmartIntentHolder.consumeQuickAction()
+            featureScreen = null
+            showAddChooser = false
+            returnToAddChooser = false
+            editKind = ""
+            editId = 0
+            editUrl = ""
+            editingRecord = null
+            addMode = "expense"
+            addPrefillAmount = 0.0
+            addPrefillCategoryKey = ""
+            addPendingAmount = 0.0
+            addPendingOriginalAmount = 0.0
+            addPendingReminderId = ""
+            addPendingDueDate = ""
+            addPrefillPartyName = ""
+            addPrefillNote = ""
+            addDraftAmount = ""
+            addSessionKey += 1
+            onTabChange(BottomDestination.Add)
+        }
+    }
     LaunchedEffect(pendingSmartTx) {
         if (pendingSmartTx != null) {
             val tx = PocketSmartIntentHolder.consumePending() ?: return@LaunchedEffect
