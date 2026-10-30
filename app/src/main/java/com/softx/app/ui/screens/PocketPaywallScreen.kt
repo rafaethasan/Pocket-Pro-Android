@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.softx.app.billing.PocketBillingManager
 import com.softx.app.billing.PocketProTier
+import com.softx.app.data.PocketNativePreferencesStore
 import com.softx.app.ui.theme.AccentBlue
 import com.softx.app.ui.theme.AccentGreen
 import com.softx.app.ui.theme.AccentPink
@@ -87,8 +88,15 @@ fun PocketPaywallScreen(
     val context = LocalContext.current
     val activity = context as? Activity
     val billingManager = remember { PocketBillingManager.getInstance(context) }
+    val preferencesStore = remember { PocketNativePreferencesStore(context) }
+    val isBangla = preferencesStore.languageCode() == "bn"
     var selectedPlanId by remember { mutableStateOf(PocketBillingManager.PRODUCT_YEARLY) }
     val isPro = billingManager.isProUser
+
+    val yearlyPrice = billingManager.getFormattedPrice(PocketBillingManager.PRODUCT_YEARLY, if (isBangla) "৳৭৯৯ / বছর" else "$9.99 / yr")
+    val yearlySecondary = if (isBangla) "মাত্র ৳৬৬ / মাস" else "Only $0.83 / mo"
+    val monthlyPrice = billingManager.getFormattedPrice(PocketBillingManager.PRODUCT_MONTHLY, if (isBangla) "৳৯৯ / মাস" else "$0.99 / mo")
+    val lifetimePrice = billingManager.getFormattedPrice(PocketBillingManager.PRODUCT_LIFETIME, if (isBangla) "৳১,৯৯৯" else "$24.99")
 
     Box(
         modifier = Modifier
@@ -215,7 +223,7 @@ fun PocketPaywallScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "স্মার্ট ট্র্যাকিং ও স্বয়ংক্রিয় আর্থিক ব্যবস্থাপনা",
+                        text = if (isBangla) "স্মার্ট ট্র্যাকিং ও স্বয়ংক্রিয় আর্থিক ব্যবস্থাপনা" else "Smart Auto-Tracking & Financial Freedom",
                         color = Color(0xFF00E5FF),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -225,7 +233,7 @@ fun PocketPaywallScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "ম্যানুয়াল টাইপিং বাদ দিয়ে বিকাশ, নগদ ও ব্যাংকের হিসাব রাখুন সম্পূর্ণ অটোমেটিক।",
+                        text = if (isBangla) "ম্যানুয়াল টাইপিং বাদ দিয়ে বিকাশ, নগদ ও ব্যাংকের হিসাব রাখুন সম্পূর্ণ অটোমেটিক।" else "Say goodbye to manual entry. Auto-track expenses, reminders & bank alerts seamlessly.",
                         color = TextSecondary,
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
@@ -244,11 +252,11 @@ fun PocketPaywallScreen(
                 ) {
                     // Annual Plan (Featured)
                     PaywallPlanCard(
-                        title = "Annual Pro (বাৎসরিক)",
-                        subtitle = "7 Days Free Trial included",
-                        price = "৳৭৯৯ / বছর",
-                        secondaryPrice = "মাত্র ৳৬৬ / মাস",
-                        badge = "BEST VALUE • SAVE 35%",
+                        title = if (isBangla) "Annual Pro (বাৎসরিক)" else "Annual Pro",
+                        subtitle = if (isBangla) "7 Days Free Trial included" else "7 Days Free Trial included",
+                        price = yearlyPrice,
+                        secondaryPrice = yearlySecondary,
+                        badge = if (isBangla) "BEST VALUE • SAVE 35%" else "BEST VALUE • SAVE 35%",
                         isSelected = selectedPlanId == PocketBillingManager.PRODUCT_YEARLY,
                         accentColor = Color(0xFFFFD54F),
                         onClick = { selectedPlanId = PocketBillingManager.PRODUCT_YEARLY },
@@ -256,10 +264,10 @@ fun PocketPaywallScreen(
 
                     // Monthly Plan
                     PaywallPlanCard(
-                        title = "Monthly Pro (মাসিক)",
-                        subtitle = "Flexible month-to-month",
-                        price = "৳৯৯ / মাস",
-                        secondaryPrice = "Cancel anytime",
+                        title = if (isBangla) "Monthly Pro (মাসিক)" else "Monthly Pro",
+                        subtitle = if (isBangla) "Flexible month-to-month" else "Flexible month-to-month",
+                        price = monthlyPrice,
+                        secondaryPrice = if (isBangla) "Cancel anytime" else "Cancel anytime",
                         badge = "",
                         isSelected = selectedPlanId == PocketBillingManager.PRODUCT_MONTHLY,
                         accentColor = Color(0xFF00E5FF),
@@ -268,11 +276,11 @@ fun PocketPaywallScreen(
 
                     // Lifetime VIP
                     PaywallPlanCard(
-                        title = "Lifetime VIP (এককালীন)",
-                        subtitle = "Pay once, use forever",
-                        price = "৳১,৯৯৯",
-                        secondaryPrice = "One-time payment • No renewal",
-                        badge = "LIMITED DEAL",
+                        title = if (isBangla) "Lifetime VIP (এককালীন)" else "Lifetime VIP",
+                        subtitle = if (isBangla) "Pay once, use forever" else "Pay once, use forever",
+                        price = lifetimePrice,
+                        secondaryPrice = if (isBangla) "One-time payment • No renewal" else "One-time payment • No renewal",
+                        badge = if (isBangla) "LIMITED DEAL" else "LIMITED DEAL",
                         isSelected = selectedPlanId == PocketBillingManager.PRODUCT_LIFETIME,
                         accentColor = AccentPink,
                         onClick = { selectedPlanId = PocketBillingManager.PRODUCT_LIFETIME },
@@ -308,32 +316,32 @@ fun PocketPaywallScreen(
                             PaywallFeatureRow(
                                 icon = Icons.Rounded.AutoAwesome,
                                 iconTint = Color(0xFF00E5FF),
-                                title = "Smart SMS Auto-Reader",
-                                subtitle = "বিকাশ, নগদ ও ব্যাংকের এসএমএস থেকে আনলিমিটেড অটো-এন্ট্রি",
+                                title = if (isBangla) "Smart SMS Auto-Reader" else "Smart Transaction Auto-Reader",
+                                subtitle = if (isBangla) "বিকাশ, নগদ ও ব্যাংকের এসএমএস থেকে আনলিমিটেড অটো-এন্ট্রি" else "Instant auto-logging from bank & mobile wallet notifications",
                             )
                             PaywallFeatureRow(
                                 icon = Icons.Rounded.Share,
                                 iconTint = AccentGreen,
-                                title = "Unlimited WhatsApp Reminders",
-                                subtitle = "বাকি আদায়ের জন্য যেকোনো সময় পেশাদার তাগাদা পাঠান",
+                                title = if (isBangla) "Unlimited WhatsApp Reminders" else "Unlimited Smart Reminders",
+                                subtitle = if (isBangla) "বাকি আদায়ের জন্য যেকোনো সময় পেশাদার তাগাদা পাঠান" else "Send respectful payback reminders via WhatsApp or SMS in 1-tap",
                             )
                             PaywallFeatureRow(
                                 icon = Icons.Rounded.PictureAsPdf,
                                 iconTint = AccentPink,
-                                title = "Branded Statement PDF & Excel",
-                                subtitle = "ব্যবসায়িক বা ব্যক্তিগত ক্লিন স্টেটমেন্ট এক্সপোর্ট করুন",
+                                title = if (isBangla) "Branded Statement PDF & Excel" else "Branded PDF & Excel Statements",
+                                subtitle = if (isBangla) "ব্যবসায়িক বা ব্যক্তিগত ক্লিন স্টেটমেন্ট এক্সপোর্ট করুন" else "Export clean personal & business financial reports anytime",
                             )
                             PaywallFeatureRow(
                                 icon = Icons.Rounded.CloudDone,
                                 iconTint = Color(0xFFFFD54F),
-                                title = "End-to-End Encrypted Cloud Sync",
-                                subtitle = "ফোন হারালেও আপনার আর্থিক তথ্য সুরক্ষিত ও সর্বদা প্রস্তুত",
+                                title = if (isBangla) "End-to-End Encrypted Cloud Sync" else "End-to-End Encrypted Cloud Sync",
+                                subtitle = if (isBangla) "ফোন হারালেও আপনার আর্থিক তথ্য সুরক্ষিত ও সর্বদা প্রস্তুত" else "Keep your sensitive money records protected & synced across devices",
                             )
                             PaywallFeatureRow(
                                 icon = Icons.Rounded.Security,
                                 iconTint = AccentBlue,
-                                title = "Zero Ads & 100% Privacy Guarantee",
-                                subtitle = "কোনো প্রকার বিজ্ঞাপন ছাড়া নিরবচ্ছিন্ন প্রিমিয়াম অভিজ্ঞতা",
+                                title = if (isBangla) "Zero Ads & 100% Privacy Guarantee" else "Zero Ads & 100% Privacy Guarantee",
+                                subtitle = if (isBangla) "কোনো প্রকার বিজ্ঞাপন ছাড়া নিরবচ্ছিন্ন প্রিমিয়াম অভিজ্ঞতা" else "Ad-free experience with absolute data confidentiality",
                             )
                         }
                     }
@@ -366,7 +374,7 @@ fun PocketPaywallScreen(
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "“বিকাশের অটো এসএমএস রিডার আমার প্রতিদিনের হিসাব রাখার সময় বাঁচিয়ে দিয়েছে!”",
+                            text = if (isBangla) "“বিকাশের অটো এসএমএস রিডার আমার প্রতিদিনের হিসাব রাখার সময় বাঁচিয়ে দিয়েছে!”" else "“The automatic notification tracker saves me hours of manual logging every week!”",
                             color = TextSecondary,
                             fontSize = 12.sp,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
@@ -481,7 +489,7 @@ fun PocketPaywallScreen(
                 }
 
                 Text(
-                    text = "Google Play দ্বারা সুরক্ষিত • যেকোনো সময় বাতিলযোগ্য",
+                    text = if (isBangla) "Google Play দ্বারা সুরক্ষিত • যেকোনো সময় বাতিলযোগ্য" else "Secured by Google Play • Cancel anytime",
                     color = TextSecondary,
                     fontSize = 11.sp,
                 )

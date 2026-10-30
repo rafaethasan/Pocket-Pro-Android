@@ -247,6 +247,24 @@ class PocketBillingManager private constructor(private val context: Context) : P
         }
     }
 
+    fun getFormattedPrice(productId: String, fallbackPrice: String): String {
+        val details = productDetailsMap[productId] ?: return fallbackPrice
+        return when (details.productType) {
+            BillingClient.ProductType.SUBS -> {
+                val pricingPhase = details.subscriptionOfferDetails
+                    ?.firstOrNull()
+                    ?.pricingPhases
+                    ?.pricingPhaseList
+                    ?.firstOrNull()
+                pricingPhase?.formattedPrice ?: fallbackPrice
+            }
+            BillingClient.ProductType.INAPP -> {
+                details.oneTimePurchaseOfferDetails?.formattedPrice ?: fallbackPrice
+            }
+            else -> fallbackPrice
+        }
+    }
+
     fun setProStatus(isPro: Boolean, tier: PocketProTier) {
         isProUser = isPro
         currentTier = tier

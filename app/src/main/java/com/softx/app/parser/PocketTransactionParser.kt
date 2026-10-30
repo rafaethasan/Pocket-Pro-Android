@@ -279,16 +279,16 @@ object PocketTransactionParser {
         val lower = text.lowercase(Locale.ROOT)
         return when {
             // Food & Dining
-            listOf("kfc", "pizza", "burger", "star kabab", "restaurant", "cafe", "foodpanda", "pathao food", "coffee", "baker", "dine", "kitchen", "biryani", "khana", "shawarma", "tea").any { lower.contains(it) } -> "food"
+            listOf("kfc", "pizza", "burger", "star kabab", "restaurant", "cafe", "foodpanda", "pathao food", "coffee", "baker", "dine", "kitchen", "biryani", "khana", "shawarma", "tea", "starbucks", "mcdonalds", "subway").any { lower.contains(it) } -> "food"
 
             // Groceries & Supermarkets
-            listOf("agora", "shwapno", "meenabazar", "grocer", "superstore", "chaldal", "bazaar", "bazar", "unimart", "daily shopping", "almas").any { lower.contains(it) } -> "groceries"
+            listOf("agora", "shwapno", "meenabazar", "grocer", "superstore", "chaldal", "bazaar", "bazar", "unimart", "daily shopping", "almas", "walmart", "target", "tesco", "costco", "carrefour", "whole foods").any { lower.contains(it) } -> "groceries"
 
             // Transport & Travel
-            listOf("uber", "pathao", "cng", "petrol", "fuel", "gas refill", "railway", "shohoz", "bus", "flyer", "air", "biman", "rickshaw", "metro", "toll", "padma bridge").any { lower.contains(it) } -> "transport"
+            listOf("uber", "pathao", "cng", "petrol", "fuel", "gas refill", "railway", "shohoz", "bus", "flyer", "air", "biman", "rickshaw", "metro", "toll", "padma bridge", "lyft", "grab", "airline", "train").any { lower.contains(it) } -> "transport"
 
             // Shopping & Apparel
-            listOf("daraz", "aarong", "yellow", "artisan", "apex", "bata", "cloth", "fashion", "mall", "gadget", "star tech", "ryans", "pickaboo", "aliexpress").any { lower.contains(it) } -> "shopping"
+            listOf("daraz", "aarong", "yellow", "artisan", "apex", "bata", "cloth", "fashion", "mall", "gadget", "star tech", "ryans", "pickaboo", "aliexpress", "amazon", "ebay", "apple", "nike", "zara", "h&m").any { lower.contains(it) } -> "shopping"
 
             // Health & Medical
             listOf("pharmacy", "pharma", "hospital", "clinic", "diagnostic", "doctor", "labaid", "square hospital", "evercare", "medicine", "ibn sina", "popular").any { lower.contains(it) } -> "health"
