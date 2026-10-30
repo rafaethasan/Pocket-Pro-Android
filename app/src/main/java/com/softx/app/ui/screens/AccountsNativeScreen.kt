@@ -128,7 +128,7 @@ fun AccountsNativeScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 132.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         item {

@@ -703,7 +703,7 @@ private fun NativeShell(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            if (activeTab != BottomDestination.Add) {
+            if (activeTab != BottomDestination.Add && featureScreen == null) {
                 PocketFloatingBottomBar(
                     activeTab = activeTab,
                     onDestinationBounds = { destination, bounds ->
@@ -983,26 +983,20 @@ private fun NativeShell(
                         },
                     )
 
-                    BottomDestination.Records -> Column(modifier = Modifier.fillMaxSize()) {
-                        FloatingTabBackBar(
-                            title = "Records",
-                            onBack = { onTabChange(BottomDestination.Home) },
-                        )
-                        RecordsNativeScreen(
-                            repository = repository,
-                            signedInUser = currentSignedInUser,
-                            onEditRecord = { record ->
-                                editingRecord = record
-                                editKind = normalizeRecordEditKind(record)
-                                editId = record.id
-                                editUrl = record.editUrl
-                                addMode = record.mode.ifBlank {
-                                    if (record.signedAmount >= 0) "income" else "expense"
-                                }
-                                onTabChange(BottomDestination.Add)
-                            },
-                        )
-                    }
+                    BottomDestination.Records -> RecordsNativeScreen(
+                        repository = repository,
+                        signedInUser = currentSignedInUser,
+                        onEditRecord = { record ->
+                            editingRecord = record
+                            editKind = normalizeRecordEditKind(record)
+                            editId = record.id
+                            editUrl = record.editUrl
+                            addMode = record.mode.ifBlank {
+                                if (record.signedAmount >= 0) "income" else "expense"
+                            }
+                            onTabChange(BottomDestination.Add)
+                        },
+                    )
 
                     BottomDestination.Add -> key(addMode, editKind, editId, addPrefillAmount, addPrefillCategoryKey, addPendingAmount, addPendingOriginalAmount, addPendingReminderId, addPendingDueDate, addPrefillPartyName, addPrefillNote, addSessionKey) {
                         AddTransactionNativeScreen(
@@ -1034,47 +1028,35 @@ private fun NativeShell(
                         )
                     }
 
-                    BottomDestination.Reports -> Column(modifier = Modifier.fillMaxSize()) {
-                        FloatingTabBackBar(
-                            title = "Reports",
-                            onBack = { onTabChange(BottomDestination.Home) },
-                        )
-                        ReportsNativeScreen(
-                            repository = repository,
-                            signedInUser = currentSignedInUser,
-                            onOpenCalendar = { featureScreen = NativeFeatureScreen.Calendar },
-                            onOpenSmartInsights = { featureScreen = NativeFeatureScreen.SmartInsights },
-                        )
-                    }
+                    BottomDestination.Reports -> ReportsNativeScreen(
+                        repository = repository,
+                        signedInUser = currentSignedInUser,
+                        onOpenCalendar = { featureScreen = NativeFeatureScreen.Calendar },
+                        onOpenSmartInsights = { featureScreen = NativeFeatureScreen.SmartInsights },
+                    )
 
-                    BottomDestination.Profile -> Column(modifier = Modifier.fillMaxSize()) {
-                        FloatingTabBackBar(
-                            title = "More",
-                            onBack = { onTabChange(BottomDestination.Home) },
-                        )
-                        MoreNativeScreen(
-                            preferencesStore = preferencesStore,
-                            onBack = { onTabChange(BottomDestination.Home) },
-                            showTopBackButton = false,
-                            onOpenSettings = { featureScreen = NativeFeatureScreen.Settings },
-                            onOpenBackupRestore = { featureScreen = NativeFeatureScreen.BackupRestore },
-                            onOpenAppLock = { featureScreen = NativeFeatureScreen.AppLock },
-                            onOpenNotifications = { showNotificationsOverlay = true },
-                            onOpenNotificationSettings = { featureScreen = NativeFeatureScreen.NotificationSettings },
-                            onOpenPlans = { featureScreen = NativeFeatureScreen.Budget },
-                            onOpenCategoryManager = {
-                                categoryManagerKind = "expense"
-                                featureScreen = NativeFeatureScreen.Categories
-                            },
-                            onOpenReports = { onTabChange(BottomDestination.Reports) },
-                            onOpenSearch = { showSearchOverlay = true },
-                            onOpenAccounts = { featureScreen = NativeFeatureScreen.Accounts },
+                    BottomDestination.Profile -> MoreNativeScreen(
+                        preferencesStore = preferencesStore,
+                        onBack = { onTabChange(BottomDestination.Home) },
+                        showTopBackButton = false,
+                        onOpenSettings = { featureScreen = NativeFeatureScreen.Settings },
+                        onOpenBackupRestore = { featureScreen = NativeFeatureScreen.BackupRestore },
+                        onOpenAppLock = { featureScreen = NativeFeatureScreen.AppLock },
+                        onOpenNotifications = { showNotificationsOverlay = true },
+                        onOpenNotificationSettings = { featureScreen = NativeFeatureScreen.NotificationSettings },
+                        onOpenPlans = { featureScreen = NativeFeatureScreen.Budget },
+                        onOpenCategoryManager = {
+                            categoryManagerKind = "expense"
+                            featureScreen = NativeFeatureScreen.Categories
+                        },
+                        onOpenReports = { onTabChange(BottomDestination.Reports) },
+                        onOpenSearch = { showSearchOverlay = true },
+                        onOpenAccounts = { featureScreen = NativeFeatureScreen.Accounts },
                             onOpenExportCenter = { featureScreen = NativeFeatureScreen.ExportCenter },
                             onOpenUserGuide = { featureScreen = NativeFeatureScreen.UserGuide },
                             onOpenHelpSupport = { featureScreen = NativeFeatureScreen.HelpSupport },
                             onOpenDataTools = { featureScreen = NativeFeatureScreen.DataTools },
                         )
-                    }
                     }
                 }
 

@@ -69,7 +69,7 @@ fun MoreNativeScreen(
 ) {
     LazyColumn(
         modifier = Modifier.padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(bottom = 176.dp),
+        contentPadding = PaddingValues(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item { Spacer(modifier = Modifier.height(14.dp)) }

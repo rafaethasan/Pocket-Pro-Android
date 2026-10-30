@@ -76,7 +76,7 @@ fun SettingsNativeScreen(
                 ),
             )
             .padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(bottom = 176.dp),
+        contentPadding = PaddingValues(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item { Spacer(modifier = Modifier.height(34.dp)) }

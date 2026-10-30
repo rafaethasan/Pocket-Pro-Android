@@ -303,8 +303,7 @@ fun BudgetNativeScreen(
     LazyColumn(
         state = listState,
         modifier = Modifier.padding(horizontal = 18.dp),
-        // Keep lower cards and empty-state text fully scrollable above the floating footer.
-        contentPadding = PaddingValues(bottom = if (hasLowerDataSections) 196.dp else 176.dp),
+        contentPadding = PaddingValues(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         item { Spacer(modifier = Modifier.height(8.dp)) }

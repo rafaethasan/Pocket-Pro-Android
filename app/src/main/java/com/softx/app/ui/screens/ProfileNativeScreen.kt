@@ -113,7 +113,7 @@ fun ProfileNativeScreen(
     if (user == null || summary == null) {
         LazyColumn(
             modifier = Modifier.padding(horizontal = 18.dp),
-            contentPadding = PaddingValues(bottom = 176.dp),
+            contentPadding = PaddingValues(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item { Spacer(modifier = Modifier.height(18.dp)) }
@@ -175,7 +175,7 @@ fun ProfileNativeScreen(
 
     LazyColumn(
         modifier = Modifier.padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(bottom = 176.dp),
+        contentPadding = PaddingValues(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item { Spacer(modifier = Modifier.height(34.dp)) }

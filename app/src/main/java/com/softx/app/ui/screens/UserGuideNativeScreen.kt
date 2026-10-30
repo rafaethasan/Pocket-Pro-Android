@@ -40,7 +40,7 @@ import com.softx.app.ui.theme.TextSecondary
 fun UserGuideNativeScreen(onBack: () -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 176.dp),
+        contentPadding = PaddingValues(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {

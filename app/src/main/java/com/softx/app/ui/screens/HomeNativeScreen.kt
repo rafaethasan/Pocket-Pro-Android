@@ -213,7 +213,7 @@ fun HomeNativeScreen(
 
     LazyColumn(
         modifier = Modifier.padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(bottom = 264.dp),
+        contentPadding = PaddingValues(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item { Spacer(modifier = Modifier.height(18.dp)) }

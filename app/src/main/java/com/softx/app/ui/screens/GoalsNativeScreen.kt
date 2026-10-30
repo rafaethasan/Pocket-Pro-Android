@@ -199,7 +199,7 @@ fun GoalsNativeScreen(
     LazyColumn(
         state = listState,
         modifier = Modifier.padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(bottom = 176.dp),
+        contentPadding = PaddingValues(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         item { Spacer(modifier = Modifier.height(14.dp)) }

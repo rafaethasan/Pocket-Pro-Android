@@ -108,7 +108,7 @@ fun ReportsNativeScreen(
     if (dashboard == null) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(bottom = 176.dp),
+            contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             item {
@@ -143,7 +143,7 @@ fun ReportsNativeScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = 176.dp),
+        contentPadding = PaddingValues(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         item {
@@ -385,7 +385,7 @@ fun ReportsNativeScreen(
 private fun FreshReportsEmptyState() {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 28.dp + 176.dp),
+        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 28.dp),
     ) {
         item {
             Column(
