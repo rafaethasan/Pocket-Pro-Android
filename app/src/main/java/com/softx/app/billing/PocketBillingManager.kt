@@ -10,6 +10,7 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
@@ -61,9 +62,14 @@ class PocketBillingManager private constructor(private val context: Context) : P
     }
 
     private fun initializeBillingClient() {
+        val pendingPurchasesParams = PendingPurchasesParams.newBuilder()
+            .enableOneTimeProducts()
+            .enablePrepaidPlans()
+            .build()
+
         billingClient = BillingClient.newBuilder(context)
             .setListener(this)
-            .enablePendingPurchases()
+            .enablePendingPurchases(pendingPurchasesParams)
             .build()
 
         startConnection()
@@ -122,10 +128,10 @@ class PocketBillingManager private constructor(private val context: Context) : P
             .setProductList(subsProductList)
             .build()
 
-        client.queryProductDetailsAsync(subsParams) { billingResult, productDetailsList ->
+        client.queryProductDetailsAsync(subsParams) { billingResult, queryProductDetailsResult ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 val newMap = productDetailsMap.toMutableMap()
-                for (details in productDetailsList) {
+                for (details in queryProductDetailsResult.productDetailsList) {
                     newMap[details.productId] = details
                 }
                 productDetailsMap = newMap
@@ -136,10 +142,10 @@ class PocketBillingManager private constructor(private val context: Context) : P
             .setProductList(inAppProductList)
             .build()
 
-        client.queryProductDetailsAsync(inAppParams) { billingResult, productDetailsList ->
+        client.queryProductDetailsAsync(inAppParams) { billingResult, queryProductDetailsResult ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 val newMap = productDetailsMap.toMutableMap()
-                for (details in productDetailsList) {
+                for (details in queryProductDetailsResult.productDetailsList) {
                     newMap[details.productId] = details
                 }
                 productDetailsMap = newMap
