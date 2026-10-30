@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
@@ -78,6 +79,7 @@ import com.softx.app.data.PocketNativeDashboardResponse
 import com.softx.app.data.PocketNativeRecentActivity
 import com.softx.app.data.PocketNativeRepository
 import com.softx.app.data.PocketNativeUser
+import com.softx.app.util.PocketShareUtils
 import com.softx.app.data.pocketLoanReminderOriginalAmount
 import com.softx.app.data.pocketLoanReminderRemainingAmount
 import com.softx.app.data.pocketLoanReminderSettledAmount
@@ -118,6 +120,7 @@ fun HomeNativeScreen(
     onOpenMore: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenRecentActivity: (PocketNativeRecentActivity) -> Unit,
+    onOpenSmartSms: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val preferencesStore = remember { PocketNativePreferencesStore(context) }
@@ -325,6 +328,70 @@ fun HomeNativeScreen(
                 net = if (isFreshGuestSpace) "—" else formatSignedAmount(todayNet, currencySymbol),
                 netAccent = if (todayNet >= 0) AccentBlue else AccentOrange,
             )
+        }
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(onClick = onOpenSmartSms)
+                    .border(1.dp, Color(0xFF00E5FF).copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
+                color = Color(0xFF131722),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF00E5FF).copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color(0xFF00E5FF),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Smart SMS Auto-Reader",
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                            )
+                            Text(
+                                text = "Auto-detect bKash, Nagad & Bank SMS",
+                                color = TextSecondary,
+                                fontSize = 11.sp,
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF00E5FF).copy(alpha = 0.16f))
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                    ) {
+                        Text(
+                            text = "⚡ Scan",
+                            color = Color(0xFF00E5FF),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                        )
+                    }
+                }
+            }
         }
         item { SectionHeader("Quick actions", "") }
         item {
@@ -562,6 +629,23 @@ fun HomeNativeScreen(
                             )
                         },
                     )
+                    if (reminder.kind == "lent") {
+                        HomeReminderDialogAction(
+                            title = "Send Reminder (তাগাদা পাঠান)",
+                            accent = Color(0xFF22C55E),
+                            onClick = {
+                                selectedLoanReminderAction = null
+                                PocketShareUtils.shareLoanReminder(
+                                    context = context,
+                                    counterparty = reminder.counterparty,
+                                    amount = remainingAmount,
+                                    currencySymbol = currencySymbol,
+                                    dueDate = reminder.dueDate,
+                                    note = reminder.note,
+                                )
+                            },
+                        )
+                    }
                     HomeReminderDialogAction(
                         title = "Edit",
                         accent = AccentBlue,

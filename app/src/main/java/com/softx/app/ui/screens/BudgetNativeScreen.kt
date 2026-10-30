@@ -34,6 +34,8 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.PieChart
 import androidx.compose.material.icons.rounded.Sell
+import androidx.compose.material.icons.rounded.Share
+import com.softx.app.util.PocketShareUtils
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -1284,6 +1286,7 @@ private fun LoanDueReminderRow(
     onDone: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val context = LocalContext.current
     val accent = if (reminder.kind == "lent") AccentGreen else AccentOrange
     val originalAmount = pocketLoanReminderOriginalAmount(reminder)
     val settledAmount = pocketLoanReminderSettledAmount(reminder)
@@ -1342,6 +1345,23 @@ private fun LoanDueReminderRow(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             maxItemsInEachRow = 3,
         ) {
+            if (reminder.kind == "lent") {
+                FlatInlineAction(
+                    label = "Reminder",
+                    icon = Icons.Rounded.Share,
+                    tint = Color(0xFF22C55E),
+                    onClick = {
+                        PocketShareUtils.shareLoanReminder(
+                            context = context,
+                            counterparty = reminder.counterparty,
+                            amount = remainingAmount,
+                            currencySymbol = "৳",
+                            dueDate = reminder.dueDate,
+                            note = reminder.note,
+                        )
+                    },
+                )
+            }
             FlatInlineAction(
                 label = "Edit",
                 icon = Icons.Rounded.CalendarMonth,

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SouthEast
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -80,6 +81,8 @@ import com.softx.app.data.PocketNativePreferencesStore
 import com.softx.app.data.PocketNativeRecordItem
 import com.softx.app.data.PocketNativeRepository
 import com.softx.app.data.PocketNativeUser
+import com.softx.app.parser.PocketSmartIntentHolder
+import com.softx.app.ui.dialogs.PocketSmartSmsDialog
 import com.softx.app.data.PocketNativeInstallmentPlan
 import com.softx.app.data.pocketInstallmentPaidAmount
 import com.softx.app.data.pocketLoanReminderOriginalAmount
@@ -410,7 +413,30 @@ private fun NativeShell(
     var budgetJumpType by rememberSaveable { mutableStateOf("") }
     var budgetJumpId by rememberSaveable { mutableStateOf("") }
     var goalJumpId by rememberSaveable { mutableStateOf(0) }
+    var showSmartSmsDialog by rememberSaveable { mutableStateOf(false) }
     val currentSignedInUser = signedInUser
+
+    val pendingSmartTx = PocketSmartIntentHolder.pendingTransaction
+    LaunchedEffect(pendingSmartTx) {
+        if (pendingSmartTx != null) {
+            val tx = PocketSmartIntentHolder.consumePending() ?: return@LaunchedEffect
+            featureScreen = null
+            showAddChooser = false
+            returnToAddChooser = false
+            editKind = ""
+            editId = 0
+            editUrl = ""
+            editingRecord = null
+            addMode = tx.mode
+            addPrefillAmount = tx.amount
+            addPrefillCategoryKey = tx.categoryKey
+            addPrefillPartyName = tx.party
+            addPrefillNote = tx.summary
+            addDraftAmount = if (tx.amount % 1.0 == 0.0) tx.amount.toLong().toString() else tx.amount.toString()
+            addSessionKey += 1
+            onTabChange(BottomDestination.Add)
+        }
+    }
 
     fun notificationCenterItems(): List<PocketNotificationCenterItem> {
         val loanItems = preferencesStore.loanDueReminders()
@@ -679,9 +705,10 @@ private fun NativeShell(
     }
 
     BackHandler(
-        enabled = showHomeTour || showNotificationsOverlay || showSearchOverlay || showPendingLoanPicker || showAddChooser || featureScreen != null || activeTab != BottomDestination.Home,
+        enabled = showSmartSmsDialog || showHomeTour || showNotificationsOverlay || showSearchOverlay || showPendingLoanPicker || showAddChooser || featureScreen != null || activeTab != BottomDestination.Home,
     ) {
         when {
+            showSmartSmsDialog -> showSmartSmsDialog = false
             showHomeTour -> closeHomeTour()
             showNotificationsOverlay -> showNotificationsOverlay = false
             showSearchOverlay -> showSearchOverlay = false
@@ -958,6 +985,7 @@ private fun NativeShell(
                             onTabChange(BottomDestination.Profile)
                         },
                         onOpenProfile = { featureScreen = NativeFeatureScreen.ProfileDetails },
+                        onOpenSmartSms = { showSmartSmsDialog = true },
                         onOpenRecentActivity = { item ->
                             val key = "${item.kind} ${item.label} ${item.note}".lowercase()
                             when {
@@ -1227,6 +1255,12 @@ private fun NativeShell(
                                         openPendingLoanPicker("repay")
                                     }
                                 }
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    AddChooserTile("Smart SMS Scan", "icon_sms_scan", Icons.Rounded.AutoAwesome, Color(0xFF00E5FF), Modifier.weight(1f)) {
+                                        showAddChooser = false
+                                        showSmartSmsDialog = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -1302,6 +1336,29 @@ private fun NativeShell(
                     shape = RoundedCornerShape(24.dp),
                     )
                 }
+
+            if (showSmartSmsDialog) {
+                PocketSmartSmsDialog(
+                    onDismiss = { showSmartSmsDialog = false },
+                    onTransactionParsed = { parsed ->
+                        featureScreen = null
+                        showAddChooser = false
+                        returnToAddChooser = false
+                        editKind = ""
+                        editId = 0
+                        editUrl = ""
+                        editingRecord = null
+                        addMode = parsed.mode
+                        addPrefillAmount = parsed.amount
+                        addPrefillCategoryKey = parsed.categoryKey
+                        addPrefillPartyName = parsed.party
+                        addPrefillNote = parsed.summary
+                        addDraftAmount = if (parsed.amount % 1.0 == 0.0) parsed.amount.toLong().toString() else parsed.amount.toString()
+                        addSessionKey += 1
+                        onTabChange(BottomDestination.Add)
+                    },
+                )
+            }
 
             }
         }

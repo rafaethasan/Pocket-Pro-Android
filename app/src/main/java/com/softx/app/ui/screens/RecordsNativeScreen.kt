@@ -47,11 +47,14 @@ import androidx.compose.material.icons.rounded.Receipt
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.ShoppingBag
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.SmokingRooms
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,6 +85,7 @@ import com.softx.app.data.PocketNativeRecordsResponse
 import com.softx.app.data.PocketNativePreferencesStore
 import com.softx.app.data.PocketNativeRepository
 import com.softx.app.data.PocketNativeUser
+import com.softx.app.util.PocketShareUtils
 import com.softx.app.ui.theme.AccentBlue
 import com.softx.app.ui.theme.AccentGreen
 import com.softx.app.ui.theme.AccentPink
@@ -215,6 +219,39 @@ fun RecordsNativeScreen(
                         fontWeight = FontWeight.Bold,
                     )
                     Text(recordSecondaryText(record).ifBlank { "Tap edit to change this entry." }, color = TextSecondary)
+                    val matchingLoan = preferencesStore.loanDueReminders().firstOrNull {
+                        it.counterparty.equals(record.label, ignoreCase = true) || it.dueDate == record.date
+                    }
+                    val isLoanReminder = matchingLoan != null || record.mode.trim().lowercase() in setOf("lent", "borrow") || record.kind.trim().lowercase() == "loan"
+                    Button(
+                        onClick = {
+                            val counterparty = matchingLoan?.counterparty?.ifBlank { record.label } ?: record.label
+                            val amount = if (matchingLoan != null) com.softx.app.data.pocketLoanReminderRemainingAmount(matchingLoan) else kotlin.math.abs(record.signedAmount)
+                            val note = matchingLoan?.note?.ifBlank { record.note } ?: record.note
+                            PocketShareUtils.shareLoanReminder(
+                                context = context,
+                                counterparty = counterparty,
+                                amount = amount,
+                                currencySymbol = payload.currencySymbol,
+                                dueDate = record.date,
+                                note = note,
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentGreen.copy(alpha = 0.18f),
+                            contentColor = AccentGreen,
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                    ) {
+                        Icon(Icons.Rounded.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(
+                            text = if (isLoanReminder) "Share Reminder (তাগাদা পাঠান)" else "Share Record (হিসাব শেয়ার করুন)",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                        )
+                    }
                 }
             },
             dismissButton = {

@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.AttachMoney
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CameraAlt
@@ -118,6 +119,7 @@ import com.softx.app.data.PocketNativeTransactionFormPayload
 import com.softx.app.data.PocketNativeTransactionPaymentMethod
 import com.softx.app.data.PocketNativeUser
 import com.softx.app.PocketReminderScheduler
+import com.softx.app.ui.dialogs.PocketSmartSmsDialog
 import com.softx.app.ui.theme.AccentBlue
 import com.softx.app.ui.theme.AccentGreen
 import com.softx.app.ui.theme.AccentOrange
@@ -226,6 +228,7 @@ fun AddTransactionNativeScreen(
     var textInputFocused by remember { mutableStateOf(false) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
     var showQuickToolsDialog by remember { mutableStateOf(false) }
+    var showSmartSmsDialog by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var capturedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val scope = rememberCoroutineScope()
@@ -496,6 +499,20 @@ fun AddTransactionNativeScreen(
                             color = TextPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = if (keypadCompactMode) 17.sp else if (compactLayout) 18.sp else 22.sp,
+                        )
+                    }
+                    IconButton(
+                        onClick = { showSmartSmsDialog = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color(0xFF00E5FF).copy(alpha = 0.12f),
+                            contentColor = Color(0xFF00E5FF),
+                        ),
+                        modifier = Modifier.size(if (keypadCompactMode) 32.dp else if (compactLayout) 36.dp else 46.dp),
+                    ) {
+                        Icon(
+                            Icons.Rounded.AutoAwesome,
+                            contentDescription = "Smart SMS Reader",
+                            modifier = Modifier.size(if (keypadCompactMode) 16.dp else if (compactLayout) 18.dp else 22.dp),
                         )
                     }
                     IconButton(
@@ -948,6 +965,26 @@ fun AddTransactionNativeScreen(
                 amountPadOpen = !amountPadOpen
                 showQuickToolsDialog = false
             },
+        )
+    }
+
+    if (showSmartSmsDialog) {
+        PocketSmartSmsDialog(
+            onDismiss = { showSmartSmsDialog = false },
+            onTransactionParsed = { parsed ->
+                selectedMode = parsed.mode
+                amountText = if (parsed.amount % 1.0 == 0.0) parsed.amount.toLong().toString() else parsed.amount.toString()
+                partyName = parsed.party
+                note = parsed.summary
+                if (parsed.categoryKey.isNotBlank()) {
+                    selectedCategoryKey = parsed.categoryKey
+                }
+                if (parsed.paymentMethod.isNotBlank()) {
+                    selectedPaymentMethod = parsed.paymentMethod
+                }
+                amountPadOpen = true
+                showSmartSmsDialog = false
+            }
         )
     }
 
