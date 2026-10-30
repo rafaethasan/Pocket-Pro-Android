@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpCenter
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
@@ -21,6 +24,7 @@ import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.PieChart
@@ -28,7 +32,9 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SettingsBackupRestore
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -66,6 +72,7 @@ fun MoreNativeScreen(
     onOpenUserGuide: () -> Unit,
     onOpenHelpSupport: () -> Unit,
     onOpenDataTools: () -> Unit,
+    onOpenPaywall: () -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.padding(horizontal = 18.dp),
@@ -90,6 +97,82 @@ fun MoreNativeScreen(
                     )
                     }
                     Spacer(modifier = Modifier.height(6.dp))
+                }
+            }
+        }
+        item {
+            val isPro = preferencesStore.isProMember()
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .clickable(onClick = onOpenPaywall),
+                color = Color(0xFF131826),
+                shape = RoundedCornerShape(18.dp),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.5.dp,
+                    if (isPro) Color(0xFFFFD54F).copy(alpha = 0.5f) else Color(0xFF00E5FF).copy(alpha = 0.35f)
+                ),
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(if (isPro) Color(0xFFFFD54F).copy(alpha = 0.16f) else Color(0xFF00E5FF).copy(alpha = 0.16f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.WorkspacePremium,
+                                contentDescription = null,
+                                tint = if (isPro) Color(0xFFFFD54F) else Color(0xFF00E5FF),
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = if (isPro) "Pocket Pro Plus Active" else "Upgrade to Pro Plus",
+                                    color = TextPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    color = if (isPro) Color(0xFFFFD54F).copy(alpha = 0.18f) else Color(0xFF00E5FF).copy(alpha = 0.18f),
+                                    shape = RoundedCornerShape(6.dp),
+                                ) {
+                                    Text(
+                                        text = if (isPro) "VIP" else "PRO",
+                                        color = if (isPro) Color(0xFFFFD54F) else Color(0xFF00E5FF),
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                            }
+                            Text(
+                                text = if (isPro) "Full VIP features unlocked • Lifetime access" else "Auto SMS reader, unlimited reminders & cloud sync",
+                                color = TextSecondary,
+                                fontSize = 11.sp,
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = Icons.Rounded.ChevronRight,
+                        contentDescription = null,
+                        tint = TextSecondary,
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
             }
         }

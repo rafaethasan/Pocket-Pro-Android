@@ -217,6 +217,17 @@ class PocketNativePreferencesStore(
 
     fun hasSeenOnboarding(): Boolean = prefs.getBoolean(KEY_ONBOARDING_SEEN, false)
     fun hasSeenHomeTour(): Boolean = prefs.getBoolean(KEY_HOME_TOUR_SEEN, false)
+    fun isProMember(): Boolean = prefs.getBoolean("pocket_is_pro_member", false)
+
+    fun setProMember(isPro: Boolean, tier: String = "pro_yearly") {
+        prefs.edit()
+            .putBoolean("pocket_is_pro_member", isPro)
+            .putString("pocket_pro_tier", tier)
+            .apply()
+    }
+
+    fun proTier(): String = prefs.getString("pocket_pro_tier", "free") ?: "free"
+
     fun hasCompletedInitialSetup(): Boolean = prefs.getBoolean(KEY_INITIAL_SETUP_DONE, false)
 
     fun currencyCode(): String = prefs.getString(KEY_CURRENCY_CODE, DEFAULT_CURRENCY_CODE)?.ifBlank {

@@ -107,6 +107,7 @@ import com.softx.app.ui.screens.DataToolsNativeScreen
 import com.softx.app.ui.screens.InitialSetupScreen
 import com.softx.app.ui.screens.LoginScreen
 import com.softx.app.ui.screens.MoreNativeScreen
+import com.softx.app.ui.screens.PocketPaywallScreen
 import com.softx.app.ui.screens.UserGuideNativeScreen
 import com.softx.app.ui.screens.OnboardingSlidesScreen
 import com.softx.app.ui.screens.PocketBrandBadge
@@ -172,6 +173,7 @@ private enum class NativeFeatureScreen {
     SmartInsights,
     Categories,
     Search,
+    Paywall,
 }
 
 private data class PocketNotificationCenterItem(
@@ -914,6 +916,10 @@ private fun NativeShell(
                     onSignedOut = onSignedOut,
                 )
 
+                NativeFeatureScreen.Paywall -> PocketPaywallScreen(
+                    onClose = { featureScreen = null },
+                )
+
                 null -> when (activeTab) {
                     BottomDestination.Home -> HomeNativeScreen(
                         repository = repository,
@@ -986,6 +992,7 @@ private fun NativeShell(
                         },
                         onOpenProfile = { featureScreen = NativeFeatureScreen.ProfileDetails },
                         onOpenSmartSms = { showSmartSmsDialog = true },
+                        onOpenPaywall = { featureScreen = NativeFeatureScreen.Paywall },
                         onOpenRecentActivity = { item ->
                             val key = "${item.kind} ${item.label} ${item.note}".lowercase()
                             when {
@@ -1084,6 +1091,7 @@ private fun NativeShell(
                             onOpenUserGuide = { featureScreen = NativeFeatureScreen.UserGuide },
                             onOpenHelpSupport = { featureScreen = NativeFeatureScreen.HelpSupport },
                             onOpenDataTools = { featureScreen = NativeFeatureScreen.DataTools },
+                            onOpenPaywall = { featureScreen = NativeFeatureScreen.Paywall },
                         )
                     }
                 }

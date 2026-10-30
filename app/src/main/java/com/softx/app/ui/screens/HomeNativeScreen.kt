@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.foundation.BorderStroke
@@ -121,9 +122,11 @@ fun HomeNativeScreen(
     onOpenProfile: () -> Unit,
     onOpenRecentActivity: (PocketNativeRecentActivity) -> Unit,
     onOpenSmartSms: () -> Unit = {},
+    onOpenPaywall: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val preferencesStore = remember { PocketNativePreferencesStore(context) }
+    val isPro = preferencesStore.isProMember()
     var loading by remember { mutableStateOf(true) }
     var errorText by remember { mutableStateOf("") }
     var dashboardResponse by remember { mutableStateOf<PocketNativeDashboardResponse?>(null) }
@@ -227,13 +230,42 @@ fun HomeNativeScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
-                    modifier = Modifier.clickable(onClick = onOpenProfile),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    PocketUserAvatar(user = user, size = 52.dp)
-                    Column {
+                    Row(
+                        modifier = Modifier.clickable(onClick = onOpenProfile),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PocketUserAvatar(user = user, size = 52.dp)
                         Text("Pocket Pro", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isPro) Color(0xFFFFD700).copy(alpha = 0.2f) else Color(0xFFFFB300).copy(alpha = 0.15f),
+                        border = BorderStroke(1.dp, if (isPro) Color(0xFFFFD700) else Color(0xFFFFB300)),
+                        modifier = Modifier.clickable(onClick = onOpenPaywall),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.WorkspacePremium,
+                                contentDescription = null,
+                                tint = if (isPro) Color(0xFFFFD700) else Color(0xFFFFB300),
+                                modifier = Modifier.size(13.dp),
+                            )
+                            Text(
+                                text = if (isPro) "PRO" else "GET PRO",
+                                color = if (isPro) Color(0xFFFFD700) else Color(0xFFFFB300),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.5.sp,
+                            )
+                        }
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
