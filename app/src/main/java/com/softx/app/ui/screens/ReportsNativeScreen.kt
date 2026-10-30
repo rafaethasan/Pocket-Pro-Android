@@ -335,9 +335,7 @@ fun ReportsNativeScreen(
                             return@Button
                         }
                         val pdfUrl = dashboard.reportsPdfUrl
-                        if (pdfUrl.isBlank()) {
-                            Toast.makeText(context, "Report PDF is not ready yet.", Toast.LENGTH_SHORT).show()
-                        } else {
+                        if (pdfUrl.isNotBlank()) {
                             scope.launch {
                                 val result = repository.downloadPdfToCache(
                                     pdfUrl,
@@ -346,13 +344,25 @@ fun ReportsNativeScreen(
                                 result.onSuccess { file ->
                                     openPdfFile(context, file)
                                 }.onFailure {
-                                    Toast.makeText(
-                                        context,
-                                        it.message ?: "Report PDF could not be downloaded.",
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
+                                    val localPdf = PocketNativePdfGenerator.generateReportPdf(
+                                        context = context,
+                                        accountName = "Primary Wallet",
+                                        currencySymbol = currencySymbol,
+                                        summary = dashboard.summary,
+                                        recentActivity = dashboard.recentActivity,
+                                    )
+                                    openPdfFile(context, localPdf)
                                 }
                             }
+                        } else {
+                            val localPdf = PocketNativePdfGenerator.generateReportPdf(
+                                context = context,
+                                accountName = "Primary Wallet",
+                                currencySymbol = currencySymbol,
+                                summary = dashboard.summary,
+                                recentActivity = dashboard.recentActivity,
+                            )
+                            openPdfFile(context, localPdf)
                         }
                     },
                     colors = ButtonDefaults.buttonColors(

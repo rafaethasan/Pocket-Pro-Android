@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.softx.app.data.PocketNativeAccountCard
 import com.softx.app.data.PocketNativeAccountsPayload
+import com.softx.app.data.PocketNativeSummary
 import com.softx.app.data.PocketNativeAccountsResponse
 import com.softx.app.data.PocketNativeRecentActivity
 import com.softx.app.data.PocketNativeRepository
@@ -234,9 +235,7 @@ fun AccountsNativeScreen(
                                 return@clickable
                             }
                             val pdfUrl = data.statementPdfBaseUrl.ifBlank { "" }
-                            if (pdfUrl.isBlank()) {
-                                Toast.makeText(context, "Statement PDF is not ready yet.", Toast.LENGTH_SHORT).show()
-                            } else {
+                            if (pdfUrl.isNotBlank()) {
                                 scope.launch {
                                     val result = repository.downloadPdfToCache(
                                         pdfUrl,
@@ -245,13 +244,33 @@ fun AccountsNativeScreen(
                                     result.onSuccess { file ->
                                         openPdfFile(context, file)
                                     }.onFailure {
-                                        Toast.makeText(
-                                            context,
-                                            it.message ?: "Statement PDF could not be downloaded.",
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
+                                        val localPdf = PocketNativePdfGenerator.generateReportPdf(
+                                            context = context,
+                                            accountName = "Statement Account",
+                                            currencySymbol = data.currencySymbol,
+                                            summary = PocketNativeSummary(
+                                                totalBalance = data.summary.totalBalance,
+                                                monthIncome = data.summary.totalIncome,
+                                                monthExpense = data.summary.totalExpense,
+                                            ),
+                                            recentActivity = data.recentActivity,
+                                        )
+                                        openPdfFile(context, localPdf)
                                     }
                                 }
+                            } else {
+                                val localPdf = PocketNativePdfGenerator.generateReportPdf(
+                                    context = context,
+                                    accountName = "Statement Account",
+                                    currencySymbol = data.currencySymbol,
+                                    summary = PocketNativeSummary(
+                                        totalBalance = data.summary.totalBalance,
+                                        monthIncome = data.summary.totalIncome,
+                                        monthExpense = data.summary.totalExpense,
+                                    ),
+                                    recentActivity = data.recentActivity,
+                                )
+                                openPdfFile(context, localPdf)
                             }
                         }
                         .padding(vertical = 8.dp),

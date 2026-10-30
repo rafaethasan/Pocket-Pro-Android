@@ -328,8 +328,28 @@ fun HomeNativeScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Available balance", color = Color.White.copy(alpha = 0.68f), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = if (isBangla) "সর্বমোট ব্যালেন্স" else "Available Balance",
+                                    color = Color.White.copy(alpha = 0.72f),
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 12.sp,
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color.White.copy(alpha = 0.14f))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                                ) {
+                                    Text(
+                                        text = if (isBangla) "🛡️ নিরাপদ ভল্ট" else "🛡️ 256-Bit Vault",
+                                        color = Color.White.copy(alpha = 0.90f),
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                }
+                            }
                             Text(
                                 text = when {
                                     balanceVisible -> formatCurrency(if (isFreshGuestSpace) 0.0 else summary.totalBalance, currencySymbol)
@@ -355,9 +375,9 @@ fun HomeNativeScreen(
                             .background(Color.White.copy(alpha = 0.08f)),
                     )
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        HeroMiniMetric("Income", if (isFreshGuestSpace) "—" else formatCurrency(summary.monthIncome, currencySymbol), Modifier.weight(1f))
-                        HeroMiniMetric("Expense", if (isFreshGuestSpace) "—" else formatCurrency(summary.monthExpense, currencySymbol), Modifier.weight(1f))
-                        HeroMiniMetric("Net", if (isFreshGuestSpace) "—" else formatSignedAmount(summary.totalBalance, currencySymbol), Modifier.weight(1f))
+                        HeroMiniMetric(if (isBangla) "মাসের মোট আয়" else "Month In", if (isFreshGuestSpace) "—" else formatCurrency(summary.monthIncome, currencySymbol), Modifier.weight(1f))
+                        HeroMiniMetric(if (isBangla) "মাসের মোট ব্যয়" else "Month Out", if (isFreshGuestSpace) "—" else formatCurrency(summary.monthExpense, currencySymbol), Modifier.weight(1f))
+                        HeroMiniMetric(if (isBangla) "নীট সঞ্চয়" else "Net Savings", if (isFreshGuestSpace) "—" else formatSignedAmount(summary.totalBalance, currencySymbol), Modifier.weight(1f))
                     }
                 }
             }
@@ -377,6 +397,7 @@ fun HomeNativeScreen(
         }
         item {
             TodayStrip(
+                isBangla = isBangla,
                 income = if (isFreshGuestSpace) "—" else formatCurrency(summary.todayIncome, currencySymbol),
                 expense = if (isFreshGuestSpace) "—" else formatCurrency(summary.todayExpense, currencySymbol),
                 net = if (isFreshGuestSpace) "—" else formatSignedAmount(todayNet, currencySymbol),
@@ -511,28 +532,28 @@ fun HomeNativeScreen(
                 }
             }
         }
-        item { SectionHeader("Quick actions", "") }
+        item { SectionHeader(if (isBangla) "কুইক অ্যাকশন" else "Quick actions", "") }
         item {
             QuickActionRow(
                 items = listOf(
-                    HomeQuickActionItem("Add entry", AccentPink, pocketFeatureAssetName("add"), pocketFeatureIcon("add"), onOpenAdd),
-                    HomeQuickActionItem("Records", HomeElectricBlue, pocketFeatureAssetName("records"), pocketFeatureIcon("records"), onOpenRecords),
-                    HomeQuickActionItem("Plans", AccentOrange, pocketFeatureAssetName("plans"), pocketFeatureIcon("plans"), onOpenBudget),
-                    HomeQuickActionItem("Goals", AccentPurple, pocketFeatureAssetName("goals"), pocketFeatureIcon("goals"), onOpenGoals),
+                    HomeQuickActionItem(if (isBangla) "এন্ট্রি যোগ" else "Add entry", AccentPink, pocketFeatureAssetName("add"), pocketFeatureIcon("add"), onOpenAdd),
+                    HomeQuickActionItem(if (isBangla) "রেকর্ডস" else "Records", HomeElectricBlue, pocketFeatureAssetName("records"), pocketFeatureIcon("records"), onOpenRecords),
+                    HomeQuickActionItem(if (isBangla) "বাজেট প্ল্যান" else "Plans", AccentOrange, pocketFeatureAssetName("plans"), pocketFeatureIcon("plans"), onOpenBudget),
+                    HomeQuickActionItem(if (isBangla) "লক্ষ্য সঞ্চয়" else "Goals", AccentPurple, pocketFeatureAssetName("goals"), pocketFeatureIcon("goals"), onOpenGoals),
                 ),
             )
         }
         item {
             QuickActionRow(
                 items = listOf(
-                    HomeQuickActionItem("Accounts", HomeElectricBlue, pocketFeatureAssetName("accounts"), pocketFeatureIcon("accounts"), onOpenAccounts),
-                    HomeQuickActionItem("Search", AccentPurple, pocketFeatureAssetName("search"), pocketFeatureIcon("search"), onOpenSearch),
-                    HomeQuickActionItem("Reports", AccentOrange, pocketFeatureAssetName("reports"), pocketFeatureIcon("reports"), onOpenReports),
-                    HomeQuickActionItem("More", AccentPurple, pocketFeatureAssetName("more"), pocketFeatureIcon("more"), onOpenMore),
+                    HomeQuickActionItem(if (isBangla) "অ্যাকাউন্টস" else "Accounts", HomeElectricBlue, pocketFeatureAssetName("accounts"), pocketFeatureIcon("accounts"), onOpenAccounts),
+                    HomeQuickActionItem(if (isBangla) "অনুসন্ধান" else "Search", AccentPurple, pocketFeatureAssetName("search"), pocketFeatureIcon("search"), onOpenSearch),
+                    HomeQuickActionItem(if (isBangla) "রিপোর্টস" else "Reports", AccentOrange, pocketFeatureAssetName("reports"), pocketFeatureIcon("reports"), onOpenReports),
+                    HomeQuickActionItem(if (isBangla) "আরও" else "More", AccentPurple, pocketFeatureAssetName("more"), pocketFeatureIcon("more"), onOpenMore),
                 ),
             )
         }
-        item { SectionHeader("Money reminders", "") }
+        item { SectionHeader(if (isBangla) "বকেয়া ও ঋণের রিমাইন্ডার" else "Money reminders", "") }
         if (pendingLoanReminders.isNotEmpty() || installmentReminders.isNotEmpty() || monthlyReminders.isNotEmpty()) {
             items(pendingLoanReminders, key = { it.id }) { reminder ->
                 val remainingAmount = pocketLoanReminderRemainingAmount(reminder)
@@ -1364,15 +1385,85 @@ private fun HeroMiniMetric(title: String, value: String, modifier: Modifier = Mo
 }
 
 @Composable
-private fun TodayStrip(income: String, expense: String, net: String, netAccent: Color) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+private fun TodayStrip(
+    isBangla: Boolean,
+    income: String,
+    expense: String,
+    net: String,
+    netAccent: Color,
+) {
+    val dateLabel = remember {
+        val now = java.time.LocalDate.now()
+        val monthName = now.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+        "${now.dayOfMonth} $monthName"
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color(0xFF131826),
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
     ) {
-        TodayValuePill("Income", income, AccentGreen, Modifier.weight(1f))
-        TodayValuePill("Expense", expense, AccentPink, Modifier.weight(1f))
-        TodayValuePill("Net", net, netAccent, Modifier.weight(1f))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF00E5FF).copy(alpha = 0.14f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.CalendarMonth,
+                            contentDescription = null,
+                            tint = Color(0xFF00E5FF),
+                            modifier = Modifier.size(15.dp),
+                        )
+                    }
+                    Text(
+                        text = if (isBangla) "আজকের লেনদেন সারাংশ" else "Today's Activity",
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.White.copy(alpha = 0.06f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                ) {
+                    Text(
+                        text = if (isBangla) "আজ • $dateLabel" else "Today • $dateLabel",
+                        color = TextSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TodayValuePill(if (isBangla) "আজকের আয়" else "Today In", income, AccentGreen, Modifier.weight(1f))
+                TodayValuePill(if (isBangla) "আজকের খরচ" else "Today Out", expense, AccentPink, Modifier.weight(1f))
+                TodayValuePill(if (isBangla) "আজকের নীট" else "Today Net", net, netAccent, Modifier.weight(1f))
+            }
+        }
     }
 }
 
@@ -1452,22 +1543,31 @@ private fun ActionTile(item: HomeQuickActionItem, modifier: Modifier = Modifier)
         modifier = modifier
             .clip(RoundedCornerShape(18.dp))
             .clickable(onClick = item.onClick)
-            .padding(vertical = 12.dp, horizontal = 6.dp),
+            .padding(vertical = 6.dp, horizontal = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        PocketSvgIcon(
-            assetName = item.assetName,
-            fallback = item.icon,
-            contentDescription = item.title,
-            tint = item.accent,
-            modifier = Modifier.size(38.dp),
-        )
+        Box(
+            modifier = Modifier
+                .size(54.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(item.accent.copy(alpha = 0.14f))
+                .border(1.dp, item.accent.copy(alpha = 0.28f), RoundedCornerShape(18.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            PocketSvgIcon(
+                assetName = item.assetName,
+                fallback = item.icon,
+                contentDescription = item.title,
+                tint = item.accent,
+                modifier = Modifier.size(26.dp),
+            )
+        }
         Text(
             item.title,
             color = TextPrimary,
             fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
