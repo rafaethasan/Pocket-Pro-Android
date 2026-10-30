@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.NorthWest
 import androidx.compose.material.icons.outlined.Notifications
@@ -82,6 +83,7 @@ import com.softx.app.data.PocketNativeRecordItem
 import com.softx.app.data.PocketNativeRepository
 import com.softx.app.data.PocketNativeUser
 import com.softx.app.parser.PocketSmartIntentHolder
+import com.softx.app.ui.dialogs.PocketReceiptScannerDialog
 import com.softx.app.ui.dialogs.PocketSmartSmsDialog
 import com.softx.app.data.PocketNativeInstallmentPlan
 import com.softx.app.data.pocketInstallmentPaidAmount
@@ -416,6 +418,7 @@ private fun NativeShell(
     var budgetJumpId by rememberSaveable { mutableStateOf("") }
     var goalJumpId by rememberSaveable { mutableStateOf(0) }
     var showSmartSmsDialog by rememberSaveable { mutableStateOf(false) }
+    var showReceiptScannerDialog by rememberSaveable { mutableStateOf(false) }
     val currentSignedInUser = signedInUser
 
     val pendingSmartTx = PocketSmartIntentHolder.pendingTransaction
@@ -732,9 +735,10 @@ private fun NativeShell(
     }
 
     BackHandler(
-        enabled = showSmartSmsDialog || showHomeTour || showNotificationsOverlay || showSearchOverlay || showPendingLoanPicker || showAddChooser || featureScreen != null || activeTab != BottomDestination.Home,
+        enabled = showReceiptScannerDialog || showSmartSmsDialog || showHomeTour || showNotificationsOverlay || showSearchOverlay || showPendingLoanPicker || showAddChooser || featureScreen != null || activeTab != BottomDestination.Home,
     ) {
         when {
+            showReceiptScannerDialog -> showReceiptScannerDialog = false
             showSmartSmsDialog -> showSmartSmsDialog = false
             showHomeTour -> closeHomeTour()
             showNotificationsOverlay -> showNotificationsOverlay = false
@@ -1018,6 +1022,7 @@ private fun NativeShell(
                         onOpenProfile = { featureScreen = NativeFeatureScreen.ProfileDetails },
                         onOpenSmartSms = { showSmartSmsDialog = true },
                         onOpenPaywall = { featureScreen = NativeFeatureScreen.Paywall },
+                        onOpenReceiptScanner = { showReceiptScannerDialog = true },
                         onOpenRecentActivity = { item ->
                             val key = "${item.kind} ${item.label} ${item.note}".lowercase()
                             when {
@@ -1293,6 +1298,10 @@ private fun NativeShell(
                                         showAddChooser = false
                                         showSmartSmsDialog = true
                                     }
+                                    AddChooserTile("Scan Receipt", "icon_receipt_scan", Icons.AutoMirrored.Rounded.ReceiptLong, Color(0xFFFFD54F), Modifier.weight(1f)) {
+                                        showAddChooser = false
+                                        showReceiptScannerDialog = true
+                                    }
                                 }
                             }
                         }
@@ -1387,6 +1396,30 @@ private fun NativeShell(
                         addPrefillPartyName = parsed.party
                         addPrefillNote = parsed.summary
                         addDraftAmount = if (parsed.amount % 1.0 == 0.0) parsed.amount.toLong().toString() else parsed.amount.toString()
+                        addSessionKey += 1
+                        onTabChange(BottomDestination.Add)
+                    },
+                )
+            }
+
+            if (showReceiptScannerDialog) {
+                PocketReceiptScannerDialog(
+                    onDismiss = { showReceiptScannerDialog = false },
+                    onReceiptScanned = { receipt ->
+                        showReceiptScannerDialog = false
+                        featureScreen = null
+                        showAddChooser = false
+                        returnToAddChooser = false
+                        editKind = ""
+                        editId = 0
+                        editUrl = ""
+                        editingRecord = null
+                        addMode = "expense"
+                        addPrefillAmount = receipt.amount
+                        addPrefillCategoryKey = receipt.categoryKey
+                        addPrefillPartyName = receipt.merchant
+                        addPrefillNote = receipt.summary
+                        addDraftAmount = if (receipt.amount % 1.0 == 0.0) receipt.amount.toLong().toString() else receipt.amount.toString()
                         addSessionKey += 1
                         onTabChange(BottomDestination.Add)
                     },

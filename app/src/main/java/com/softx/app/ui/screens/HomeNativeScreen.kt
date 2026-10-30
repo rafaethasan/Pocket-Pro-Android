@@ -123,6 +123,7 @@ fun HomeNativeScreen(
     onOpenRecentActivity: (PocketNativeRecentActivity) -> Unit,
     onOpenSmartSms: () -> Unit = {},
     onOpenPaywall: () -> Unit = {},
+    onOpenReceiptScanner: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val preferencesStore = remember { PocketNativePreferencesStore(context) }
@@ -439,6 +440,70 @@ fun HomeNativeScreen(
                         Text(
                             text = "⚡ Scan",
                             color = Color(0xFF00E5FF),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                        )
+                    }
+                }
+            }
+        }
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(onClick = onOpenReceiptScanner)
+                    .border(1.dp, Color(0xFFFFD54F).copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
+                color = Color(0xFF131722),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFFFD54F).copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ReceiptLong,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD54F),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = if (isBangla) "স্মার্ট রসিদ স্ক্যানার (OCR)" else "Smart Receipt Scanner (OCR)",
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                            )
+                            Text(
+                                text = if (isBangla) "বিল বা মেমোর ছবি তুলে অটো-এন্ট্রি নিন" else "Snap paper bill or memo to auto-fill expense",
+                                color = TextSecondary,
+                                fontSize = 11.sp,
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFFFD54F).copy(alpha = 0.16f))
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                    ) {
+                        Text(
+                            text = "📸 Snap",
+                            color = Color(0xFFFFD54F),
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                         )
