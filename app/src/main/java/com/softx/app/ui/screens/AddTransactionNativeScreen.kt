@@ -1,12 +1,16 @@
 package com.softx.app.ui.screens
 
+import android.Manifest
 import android.app.DatePickerDialog
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -246,6 +250,41 @@ fun AddTransactionNativeScreen(
         if (bitmap != null) {
             capturedBitmap = bitmap
             selectedImageUri = null
+        }
+    }
+    val isBangla = preferencesStore.languageCode() == "bn"
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            runCatching {
+                cameraLauncher.launch(null)
+            }.onFailure { e ->
+                Toast.makeText(context, "Could not open camera: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                if (isBangla) "ছবি তুলতে ক্যামেরা পারমিশন প্রয়োজন।" else "Camera permission is required.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    fun startTransactionCamera() {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            runCatching {
+                cameraLauncher.launch(null)
+            }.onFailure { e ->
+                Toast.makeText(context, "Could not open camera: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -914,7 +953,7 @@ fun AddTransactionNativeScreen(
                     Button(
                         onClick = {
                             showImageSourceDialog = false
-                            cameraLauncher.launch(null)
+                            startTransactionCamera()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = AccentPurple, contentColor = TextPrimary),

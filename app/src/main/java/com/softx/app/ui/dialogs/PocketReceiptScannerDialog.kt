@@ -1,5 +1,7 @@
 package com.softx.app.ui.dialogs
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -8,6 +10,7 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -120,6 +123,42 @@ fun PocketReceiptScannerDialog(
         }
     }
 
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            runCatching {
+                cameraLauncher.launch(null)
+            }.onFailure { e ->
+                Toast.makeText(context, "Could not open camera: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                if (isBangla) "রসিদের ছবি তুলতে ক্যামেরা পারমিশন প্রয়োজন। আপনি গ্যালারি থেকেও ছবি সিলেক্ট করতে পারেন।"
+                else "Camera permission is required to snap receipts. You can also pick from gallery.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    fun startCamera() {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            runCatching {
+                cameraLauncher.launch(null)
+            }.onFailure { e ->
+                Toast.makeText(context, "Could not open camera: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -137,6 +176,14 @@ fun PocketReceiptScannerDialog(
             } else {
                 Toast.makeText(context, "Could not load selected image", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    fun startGallery() {
+        runCatching {
+            galleryLauncher.launch("image/*")
+        }.onFailure { e ->
+            Toast.makeText(context, "Could not open gallery: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -222,7 +269,7 @@ fun PocketReceiptScannerDialog(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Button(
-                        onClick = { cameraLauncher.launch(null) },
+                        onClick = { startCamera() },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -247,7 +294,7 @@ fun PocketReceiptScannerDialog(
                     }
 
                     Button(
-                        onClick = { galleryLauncher.launch("image/*") },
+                        onClick = { startGallery() },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
